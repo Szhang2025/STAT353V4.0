@@ -1,0 +1,477 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Statistics Lab</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1d2330;--mut:#5b6475;--card:#fff;--ac:#1f6f8b;--bd:#dfe3ea;--ok:#1b7f4b;--bad:#b3261e;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--fg:#e8eaf0;--mut:#9aa3b5;--card:#1c2029;--ac:#6cc4e0;--bd:#2d3340;--ok:#5fd38d;--bad:#ff8a80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171d;--fg:#e8eaf0;--mut:#9aa3b5;--card:#1c2029;--ac:#6cc4e0;--bd:#2d3340;--ok:#5fd38d;--bad:#ff8a80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+[hidden]{display:none!important}
+main,header,nav{max-width:760px;margin:auto;padding:0 14px}
+nav{display:flex;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-top:6px;padding-bottom:6px;z-index:5}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin:12px 0}
+h1{margin:14px 0 2px;font-size:1.5rem}h2{font-size:1.1rem;margin:.2em 0}
+.m{color:var(--mut);font-size:.9rem}
+a.t{color:var(--ac);border-bottom:1px dotted;cursor:pointer}
+table{border-collapse:collapse;width:100%;font-size:.9rem}td,th{border:1px solid var(--bd);padding:4px 6px;text-align:center}
+button,select,input{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:5px 9px;max-width:100%}
+input[type=number]{width:5.5em}input[type=range]{padding:0;vertical-align:middle}
+nav{flex-wrap:wrap}nav button{flex:1;padding:5px 4px;font-size:.85rem}nav .on{background:var(--ac);color:var(--bg)}textarea,input[type=text]{width:100%;box-sizing:border-box}h3{font-size:1rem;margin:.8em 0 .2em}
+#mo{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.box{background:var(--card);border-radius:12px;padding:14px;max-width:460px;max-height:80vh;overflow:auto}
+.o{display:block;padding:4px 0}.ok{color:var(--ok)}.no{color:var(--bad)}
+.f{fill:var(--ac);opacity:.8}.l{fill:none;stroke:var(--ac);stroke-width:2}.k{fill:none;stroke:var(--ac);stroke-width:2}.b{fill:var(--bad)}
+svg text{fill:currentColor}.w{overflow-x:auto}ul.tr{margin:.3em 0;padding-left:1.2em}
+.dt th{position:sticky;top:0;background:var(--card)}.dt table{font-size:.85rem}</style><script>window.MathJax={tex:{inlineMath:[["$","$"]]},svg:{fontCache:"global"}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script></head><body>
+<header><h1>Statistics Lab</h1><p class="m">Modules 1–2 · tap any <a class="t" data-k="experiment">underlined term</a> or number for a popup example.</p></header>
+<nav><button data-t="m1" class="on">1 Probability</button><button data-t="m2">2 Descriptive</button><button data-t="m3">3 Inference</button><button data-t="m4">4 Regression &amp; ANOVA</button><button data-t="qz">Quizzes</button></nav>
+<main><section id="m1"></section>
+<section id="m2" hidden>
+<div class="c"><h2>2.1 Choose data</h2><select id="ds"><option value="phones">Phones</option><option value="exam">Study hours &amp; exam scores</option><option value="comm">Commutes</option></select> or upload a CSV <input id="up" type="file" accept=".csv,text/csv"><p>Variable: <select id="v"></select></p><p class="m" id="di"></p><div id="zdt2" class="tex2jax_ignore"></div></div>
+<div class="c"><h2>2.2 Numerical summaries</h2><p class="m">Tap a value to see how it is computed from this data.</p><div id="sm"></div></div>
+<div class="c"><h2>2.3 Distribution plots</h2><p>Bins: <input id="bn" type="range" min="3" max="20" value="6"></p><div id="pl"></div></div>
+<div class="c"><h2>2.4 Scatter plot</h2><p>x <select id="sx"></select> y <select id="sy"></select></p><div id="sc"></div></div>
+</section>
+<section id="m3" hidden></section><section id="m4" hidden></section><section id="qz" hidden></section></main>
+<div id="mo" hidden><div class="box"><h3 id="mt" style="margin:0 0 6px"></h3><div id="mb"></div><p><button id="x">Close</button></p></div></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const f2=x=>String(+(+x).toPrecision(3)),f4=x=>isFinite(x)?String(+(+x).toFixed(4)):"—";
+const TERMS={
+experiment:["Experiment","A process with an uncertain outcome. Here: draw one phone at random from the batch of 200."],
+sample:["Sample space","The set of all possible outcomes. Here: the 200 phones, each equally likely."],
+count:["Multiplication rule","If step 1 has m ways and step 2 has n ways, there are m×n ways in all. 2 brands × 2 origins = 4 cells in our table."],
+perm:["Permutation","Ordered selection of k from n: P(n,k)=n!/(n−k)!. Ranking 3 of 200 phones gold/silver/bronze: 200·199·198 = 7,880,400."],
+comb:["Combination","Unordered selection: C(n,k)=n!/(k!(n−k)!)=P(n,k)/k!. A set of 5 phones to inspect: C(200,5) = 2,535,650,040."],
+event:["Event","Any subset of the sample space. A∪B: A or B (or both); A∩B: both; Aᶜ: not A. I∪V = 150+120−100 = 170 phones."],
+venn:["Venn diagram","Circles are events, overlap is the intersection. Count the overlap once: |I∪V| = 150+120−100 = 170."],
+prob:["Probability","With equally likely outcomes, P(A) = outcomes in A / outcomes in S. P(I)=150/200=0.75. Axioms: P≥0, P(S)=1, additive for disjoint events."],
+cond:["Conditional probability","P(A|B)=P(A∩B)/P(B): shrink the sample space to B. P(I|V)=100/120=0.833: among Vietnam phones, 83% are iPhones."],
+indep:["Independence","A, B independent if P(A∩B)=P(A)P(B), i.e. P(A|B)=P(A). Here 0.5 ≠ 0.75×0.6 = 0.45, so brand and origin are dependent."],
+disj:["Disjoint events","A∩B=∅, so P(A∩B)=0. Disjoint events with positive probability are never independent: if one happens the other cannot."],
+total:["Law of total probability","If B₁…B_k partition S, P(A)=ΣP(A|Bᵢ)P(Bᵢ). Split phones by origin and add the weighted conditional probabilities."],
+bayes:["Bayes formula","P(B|A)=P(A|B)P(B)/P(A), with P(A) from total probability. It reverses a conditional: from P(I|V) to P(V|I)."],
+tree:["Probability tree","Branches carry conditional probabilities. Multiply along a path for an intersection; add paths that end in the same event."],
+rv:["Random variable","A number attached to each outcome. X=1 if the phone is an iPhone, else 0. Discrete: countable values. Continuous: any value in an interval."],
+pmf:["pmf","Probability mass function p(k)=P(X=k) for discrete X. Values ≥ 0 and they sum to 1."],
+pdf:["pdf","Density f(x) for continuous X. P(a≤X≤b) is the area under f. P(X=x)=0, and f can exceed 1."],
+cdf:["CDF","F(x)=P(X≤x). Non-decreasing from 0 to 1: a step function for discrete X, smooth for continuous X."],
+mean:["Mean (expected value)","E(X)=Σx·p(x) or ∫x f(x)dx, the long-run average. For the iPhone indicator, E(X)=0.75."],
+variance:["Variance","Var(X)=E[(X−μ)²]=E(X²)−μ². Indicator: p(1−p)=0.1875. Var(aX+b)=a²Var(X)."],
+sd:["Standard deviation","σ=√Var(X), in the units of X."],
+skew:["Skewness","Right skew: long right tail, mean &gt; median. Left skew: long left tail, mean &lt; median."],
+cov:["Covariance","Cov(X,Y)=E(XY)−E(X)E(Y). Positive: large together. Var(X+Y)=Var X+Var Y+2Cov(X,Y)."],
+cor:["Correlation","ρ=Cov/(σXσY), between −1 and 1, unit-free. Independent ⇒ ρ=0, but ρ=0 does not imply independence."],
+joint:["Joint distribution","p(x,y)=P(X=x,Y=y). Marginals: sum the rows or the columns."]};
+const T=s=>s.replace(/\[(\w+)\|([^\]]+)\]/g,'<a class="t" data-k="$1">$2</a>');
+// ---- charts
+const W=340,H=190,L=38,R=8,Tp=8,B=24;
+function frame(x0,x1,y0,y1,fn,xt=3,ny=2){const sx=x=>L+(x-x0)/(x1-x0||1)*(W-L-R),sy=y=>H-B-(y-y0)/(y1-y0||1)*(H-B-Tp);
+let a=`<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="currentColor"/><line x1="${L}" y1="${Tp}" x2="${L}" y2="${H-B}" stroke="currentColor"/>`;
+for(let i=0;xt&&i<=xt;i++){const v=x0+(x1-x0)*i/xt;a+=`<text x="${sx(v)}" y="${H-8}" text-anchor="middle">${f2(v)}</text>`}
+for(let i=0;ny&&i<=ny;i++){const v=y0+(y1-y0)*i/ny;a+=`<text x="${L-4}" y="${sy(v)+3}" text-anchor="end">${f2(v)}</text>`}
+return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:520px;color:var(--fg)" font-size="10">${a}${fn(sx,sy)}</svg>`}
+// ---- Module 1
+const venn=`<svg viewBox="0 0 340 170" style="width:100%;max-width:420px;color:var(--fg)" font-size="13"><circle cx="130" cy="85" r="65" class="f" style="opacity:.3"/><circle cx="210" cy="85" r="65" class="b" style="opacity:.3"/><text x="92" y="90" text-anchor="middle">50</text><text x="170" y="90" text-anchor="middle">100</text><text x="248" y="90" text-anchor="middle">20</text><text x="322" y="160" text-anchor="middle">30</text><text x="100" y="18" text-anchor="middle">iPhone I (150)</text><text x="240" y="18" text-anchor="middle">Vietnam V (120)</text></svg>`;
+const pI=.75,pV=.6,pIV=.5,pIgV=100/120,pVgI=100/150,pIgNV=50/80;
+const RW=[["prob","P(I)","150/200",pI],["prob","P(V)","120/200",pV],["prob","P(I∩V)","100/200",pIV],["event","P(I∪V)","P(I)+P(V)−P(I∩V)",pI+pV-pIV],["cond","P(I | V)","P(I∩V)/P(V)",pIgV],["cond","P(V | I)","P(I∩V)/P(I)",pVgI],["indep","P(I)·P(V)","compare P(I∩V)=0.5",pI*pV],["total","P(I)","P(I|V)P(V)+P(I|Vᶜ)P(Vᶜ)",pIgV*pV+pIgNV*.4],["bayes","P(V | I)","P(I|V)P(V)/P(I)",pIgV*pV/pI]];
+const J={11:.5,10:.25,"01":.1,"00":.15},EX_=.75,EY_=.6,cv=.5-EX_*EY_,vX=EX_*(1-EX_),vY=EY_*(1-EY_),vS=2.35-1.35**2;
+$("#m1").innerHTML=T(`
+<div class="c"><h2>1.1 The batch</h2><p>A batch of 200 smartphones: 120 are made in Vietnam, 100 of those are iPhones, and there are 150 iPhones in total. The [experiment|experiment] is to draw one phone at random; the [sample|sample space] is the 200 phones; an [event|event] is a subset, e.g. I = “iPhone”, V = “made in Vietnam”.</p>
+<table><tr><th></th><th>Vietnam</th><th>Elsewhere</th><th>Total</th></tr><tr><th>iPhone</th><td>100</td><td>50</td><td>150</td></tr><tr><th>Other</th><td>20</td><td>30</td><td>50</td></tr><tr><th>Total</th><td>120</td><td>80</td><td>200</td></tr></table>
+<p>[venn|Venn diagram] of the counts:</p>${venn}
+<p>Simulate: draw <input id="sn" type="number" value="1000" min="1" max="100000"> phones with replacement <button id="sb">Draw</button></p><p id="so" class="m"></p></div>
+<div class="c"><h2>1.2 Counting</h2><p>The [count|multiplication rule], [perm|permutations] (order matters) and [comb|combinations] (order does not):</p><p>n <input id="cn" type="number" value="200"> k <input id="ck" type="number" value="5"></p><p id="co"></p></div>
+<div class="c"><h2>1.3 Probability rules on the batch</h2><div class="w"><table><tr><th>Quantity</th><th>Formula</th><th>Value</th></tr>${RW.map(([k,a,b,v])=>`<tr><td><a class="t" data-k="${k}">${a}</a></td><td>${b}</td><td>${f4(v)}</td></tr>`).join("")}</table></div>
+<p>P(I)P(V)=0.45 ≠ P(I∩V)=0.5, so I and V are not [indep|independent]. I and its complement are [disj|disjoint]; I and V overlap in 100 phones, so they are not. Total probability and [bayes|Bayes] give 0.75 and 0.667 above.</p></div>
+<div class="c"><h2>1.4 Probability tree</h2><p>[tree|Tree]: first split by origin, then by brand. Multiply along a path.</p><ul class="tr"><li>Vietnam 0.6<ul class="tr"><li>iPhone 0.833 → 0.6×0.833 = 0.500</li><li>Other 0.167 → 0.100</li></ul></li><li>Elsewhere 0.4<ul class="tr"><li>iPhone 0.625 → 0.250</li><li>Other 0.375 → 0.150</li></ul></li></ul><p class="m">Add the iPhone paths: 0.5+0.25 = 0.75 = P(I).</p></div>
+<div class="c"><h2>1.5 Random variables &amp; distributions</h2><p>A [rv|random variable] is discrete (described by a [pmf|pmf]) or continuous (a [pdf|pdf]); both have a [cdf|CDF]. Explore [mean|mean], [variance|variance], [sd|SD] and [skew|skewness]:</p><select id="dn"></select><p class="m" id="dd"></p><div id="dp"></div><div id="dv"></div></div>
+<div class="c"><h2>1.6 Joint distribution, covariance, correlation</h2><p>Draw one phone. X=1 if iPhone, Y=1 if made in Vietnam. The [joint|joint pmf] comes straight from the batch:</p>
+<table><tr><th></th><th>Y=1</th><th>Y=0</th><th>p(x)</th></tr><tr><th>X=1</th><td>${J[11]}</td><td>${J[10]}</td><td>0.75</td></tr><tr><th>X=0</th><td>${J["01"]}</td><td>${J["00"]}</td><td>0.25</td></tr><tr><th>p(y)</th><td>0.6</td><td>0.4</td><td>1</td></tr></table>
+<p>E(X)=0.75, E(Y)=0.6, E(XY)=0.5. [cov|Cov] = 0.5−0.75×0.6 = <b>${f4(cv)}</b>. Var(X)=${f4(vX)}, Var(Y)=${f4(vY)}, so [cor|correlation] = <b>${f4(cv/Math.sqrt(vX*vY))}</b>: weakly positive.</p>
+<p>Properties: E(aX+b)=aE(X)+b; Var(aX+b)=a²Var(X); E(X+Y)=E(X)+E(Y)=1.35; Var(X+Y)=Var X+Var Y+2Cov = ${f4(vX)}+${f4(vY)}+${f4(2*cv)} = <b>${f4(vX+vY+2*cv)}</b>. Check directly from the pmf of X+Y: ${f4(vS)}. If they were independent, the covariance term would vanish.</p></div>`);
+function cnt(){const n=+$("#cn").value|0,k=+$("#ck").value|0;if(n<0||k<0||k>n||n>400){$("#co").textContent="Need 0 ≤ k ≤ n ≤ 400";return}let p=1n,f=1n;for(let i=0;i<k;i++)p*=BigInt(n-i);for(let i=2;i<=k;i++)f*=BigInt(i);$("#co").innerHTML=`P(${n},${k}) = ${p.toLocaleString()}<br>C(${n},${k}) = ${(p/f).toLocaleString()}<br>k! = ${f.toLocaleString()}`}
+$("#cn").oninput=$("#ck").oninput=cnt;cnt();
+$("#sb").onclick=()=>{const n=Math.min(1e5,+$("#sn").value||1);let c=0;for(let i=0;i<n;i++)if(Math.random()<.75)c++;$("#so").textContent=`${c} iPhones in ${n} draws: relative frequency ${f4(c/n)} (true P(I)=0.75). More draws get closer: the law of large numbers.`};
+const lf=n=>{let s=0;for(let i=2;i<=n;i++)s+=Math.log(i);return s};
+const DS={
+Bernoulli:{t:"One trial: success with probability p (e.g. a phone is an iPhone).",d:1,P:[["p",.05,.95,.05,.3]],r:()=>[0,1],f:(k,p)=>k?p:1-p},
+Binomial:{t:"Number of successes in n independent trials.",d:1,P:[["n",1,40,1,12],["p",.05,.95,.05,.3]],r:n=>[0,n],f:(k,n,p)=>Math.exp(lf(n)-lf(k)-lf(n-k)+k*Math.log(p)+(n-k)*Math.log(1-p))},
+Geometric:{t:"Number of trials until the first success.",d:1,P:[["p",.1,.9,.05,.25]],r:()=>[1,40],f:(k,p)=>(1-p)**(k-1)*p},
+Poisson:{t:"Count of events in a fixed interval, rate λ.",d:1,P:[["λ",.5,15,.5,4]],r:l=>[0,Math.ceil(l+6*Math.sqrt(l)+5)],f:(k,l)=>Math.exp(-l+k*Math.log(l)-lf(k))},
+Uniform:{t:"All values between a and b equally likely.",d:0,P:[["a",0,5,.5,0],["b",6,12,.5,8]],r:(a,b)=>[a-1,b+1],f:(x,a,b)=>x>=a&&x<=b?1/(b-a):0},
+Exponential:{t:"Waiting time with rate λ; memoryless.",d:0,P:[["λ",.2,3,.1,1]],r:l=>[0,7/l],f:(x,l)=>l*Math.exp(-l*x)},
+Normal:{t:"Bell curve with mean μ and standard deviation σ.",d:0,P:[["μ",-5,5,.5,0],["σ",.5,4,.1,1]],r:(m,s)=>[m-4*s,m+4*s],f:(x,m,s)=>Math.exp(-(((x-m)/s)**2)/2)/(s*Math.sqrt(2*Math.PI))}};
+$("#dn").innerHTML=Object.keys(DS).map(k=>`<option>${k}</option>`).join("");
+function setP(){const d=DS[$("#dn").value];$("#dd").textContent=d.t;$("#dp").innerHTML=d.P.map(([n,a,b,s,v])=>`<label>${n} = <b>${v}</b> <input type="range" min="${a}" max="${b}" step="${s}" value="${v}"></label> `).join("");$$("#dp input").forEach(i=>i.oninput=rd);rd()}
+function rd(){const d=DS[$("#dn").value],p=$$("#dp input").map(i=>+i.value);$$("#dp b").forEach((b,i)=>b.textContent=p[i]);
+const [lo,hi]=d.r(...p);let xs=[],ys=[],w=[];
+if(d.d)for(let k=lo;k<=hi;k++){xs.push(k);ys.push(d.f(k,...p));w=ys}else{const dx=(hi-lo)/400;for(let i=0;i<=400;i++){const x=lo+i*dx;xs.push(x);ys.push(d.f(x,...p));w.push(ys[i]*dx)}}
+const tot=w.reduce((a,b)=>a+b),m=xs.reduce((a,x,i)=>a+x*w[i],0)/tot,v=xs.reduce((a,x,i)=>a+(x-m)**2*w[i],0)/tot,sd=Math.sqrt(v),sk=xs.reduce((a,x,i)=>a+((x-m)/sd)**3*w[i],0)/tot;
+let c=0;const F=w.map(x=>c+=x/tot),ym=Math.max(...ys)*1.1;
+const pm=d.d?frame(lo-.5,hi+.5,0,ym,(sx,sy)=>xs.map((x,i)=>`<rect class="f" x="${sx(x-.35)}" y="${sy(ys[i])}" width="${sx(x+.35)-sx(x-.35)}" height="${sy(0)-sy(ys[i])}"/>`).join("")):frame(lo,hi,0,ym,(sx,sy)=>`<polyline class="l" points="${xs.map((x,i)=>sx(x)+","+sy(ys[i])).join(" ")}"/>`);
+const pts=d.d?xs.flatMap((x,i)=>[[x,i?F[i-1]:0],[x,F[i]]]):xs.map((x,i)=>[x,F[i]]);
+const cd=frame(d.d?lo-.5:lo,d.d?hi+.5:hi,0,1,(sx,sy)=>`<polyline class="l" points="${pts.map(q=>sx(q[0])+","+sy(q[1])).join(" ")}"/>`);
+$("#dv").innerHTML=`<p>Mean <b>${f2(m)}</b> · Var <b>${f2(v)}</b> · SD <b>${f2(sd)}</b> · skewness ${f2(sk)} → <b>${Math.abs(sk)<.2?"roughly symmetric":sk>0?"right-skewed":"left-skewed"}</b></p><p class="m">${d.d?"pmf P(X=k)":"pdf f(x) (area = probability)"}</p>${pm}<p class="m">CDF F(x)=P(X≤x)</p>${cd}`}
+$("#dn").onchange=setP;setP();
+// ---- Module 2
+const CSV={phones:"brand,vietnam,price,storage,battery\niPhone,Y,799,128,20\niPhone,Y,899,256,22\niPhone,N,1099,512,24\niPhone,Y,1199,512,26\niPhone,N,699,128,18\niPhone,Y,999,256,23\nSamsung,Y,649,128,19\nSamsung,Y,799,256,21\nSamsung,N,999,512,24\nSamsung,Y,349,64,16\nPixel,N,599,128,20\nPixel,N,799,256,22\nPixel,Y,449,128,18\nXiaomi,Y,299,64,17\nXiaomi,Y,399,128,19\nXiaomi,N,249,64,15\nOnePlus,N,549,256,21\nMoto,Y,199,64,15",
+exam:"hours,score\n1,52\n2,55\n2,61\n3,58\n3,66\n4,64\n4,72\n5,70\n5,75\n6,79\n6,74\n7,83\n8,86\n9,90\n10,93",
+comm:"km,minutes\n2,6\n3,7\n3,9\n4,8\n5,12\n5,11\n6,14\n7,15\n8,17\n9,19\n10,18\n12,25\n15,28\n18,31\n25,40\n30,55"};
+const DB={};let cols,st,SC;
+function parse(t){const Ls=t.trim().split(/\r?\n/).map(r=>r.split(",").map(s=>s.trim())),h=Ls.shift(),o={};h.forEach((n,i)=>{const raw=Ls.map(r=>r[i]??""),v=raw.filter(s=>s!==""),num=v.length>0&&v.every(s=>isFinite(s));o[n]={num,raw}});return o}
+for(const k in CSV)DB[k]=parse(CSV[k]);
+const q=(s,p)=>{const h=(s.length-1)*p,i=Math.floor(h);return s[i]+(h-i)*((s[i+1]??s[i])-s[i])};
+function S(x){const n=x.length,s=[...x].sort((a,b)=>a-b),m=x.reduce((a,b)=>a+b)/n,ss=x.reduce((a,b)=>a+(b-m)**2,0),v=ss/(n-1),sd=Math.sqrt(v),q1=q(s,.25),q3=q(s,.75);return{x,n,s,m,ss,v,sd,q1,q3,med:q(s,.5),min:s[0],max:s[n-1],iqr:q3-q1,sk:x.reduce((a,b)=>a+((b-m)/sd)**3,0)/n}}
+const EX={n:s=>`Count the observations: n = ${s.n}.`,
+m:s=>`Add all values: sum = ${f2(s.m*s.n)}. Divide by n = ${s.n}: ${f2(s.m*s.n)}/${s.n} = ${f2(s.m)}. The mean is the balance point of the data.`,
+med:s=>`Sort the data: ${s.s.slice(0,7).map(f2).join(", ")}… The middle value (average of the two middle ones when n is even) is ${f2(s.med)}; half the data lie below it.`,
+min:s=>`Smallest value in the sorted list: ${f2(s.min)}.`,max:s=>`Largest value in the sorted list: ${f2(s.max)}.`,
+q1:s=>`Position 1+(n−1)×0.25 = ${f2(1+(s.n-1)*.25)} in the sorted list; interpolate between neighbours → Q1 = ${f2(s.q1)}. About 25% of values lie below.`,
+q3:s=>`Position 1+(n−1)×0.75 = ${f2(1+(s.n-1)*.75)} in the sorted list; interpolate → Q3 = ${f2(s.q3)}. About 75% of values lie below.`,
+iqr:s=>`Q3 − Q1 = ${f2(s.q3)} − ${f2(s.q1)} = ${f2(s.iqr)}. Outlier fences: ${f2(s.q1-1.5*s.iqr)} to ${f2(s.q3+1.5*s.iqr)}; ${s.s.filter(v=>v<s.q1-1.5*s.iqr||v>s.q3+1.5*s.iqr).length} point(s) fall outside (drawn red in the boxplot).`,
+v:s=>`Mean = ${f2(s.m)}. First squared deviations: ${s.x.slice(0,3).map(v=>`(${f2(v)}−${f2(s.m)})² = ${f2((v-s.m)**2)}`).join("; ")}… Sum over all ${s.n} values = ${f2(s.ss)}. Divide by n−1 = ${s.n-1}: s² = ${f2(s.v)} (squared units).`,
+sd:s=>`s = √${f2(s.v)} = ${f2(s.sd)}, in the data’s own units: a typical distance from the mean.`,
+sk:s=>`Average of ((x−mean)/s)³ = ${f2(s.sk)}. Positive → right skew (mean ${f2(s.m)} vs median ${f2(s.med)}); negative → left skew; near 0 → roughly symmetric.`,
+r:()=>`Centre each variable: Σ(x−x̄)(y−ȳ) = ${f2(SC.sxy)}, Σ(x−x̄)² = ${f2(SC.sxx)}, Σ(y−ȳ)² = ${f2(SC.syy)}. r = ${f2(SC.sxy)}/√(${f2(SC.sxx)}·${f2(SC.syy)}) = ${f4(SC.r)}. The sign gives direction, the size gives linear strength. It does not prove causation.`,
+p:s=>`Relative frequency = count / n. Click rows to compare: counts add up to n = ${s}.`};
+function load(k){cols=DB[k];const nm=Object.keys(cols),nn=nm.filter(n=>cols[n].num);$("#v").innerHTML=nm.map(n=>`<option>${n}</option>`).join("");$("#sx").innerHTML=$("#sy").innerHTML=nn.map(n=>`<option>${n}</option>`).join("");if(nn.length>1)$("#sy").selectedIndex=1;$("#di").textContent=`${nm.length} variables: ${nm.map(n=>n+(cols[n].num?" (numeric)":" (categorical)")).join(", ")}`;draw()}
+function draw(){const c=cols[$("#v").value],v=c.raw.filter(s=>s!=="");
+if(c.num){const x=v.map(Number);st=S(x);const rows=[["n","n",st.n],["m","Mean",st.m],["med","Median",st.med],["min","Min",st.min],["q1","Q1",st.q1],["q3","Q3",st.q3],["max","Max",st.max],["iqr","IQR",st.iqr],["v","Sample variance",st.v],["sd","Std deviation",st.sd],["sk","Skewness",st.sk]];
+$("#sm").innerHTML=`<table>${rows.map(([k,l,val])=>`<tr><th>${l}</th><td><a class="t" data-e="${k}" data-l="${l}">${f2(val)}</a></td></tr>`).join("")}</table>`;
+const k=+$("#bn").value,{min,max}=st,w=(max-min)/k||1,cn=Array(k).fill(0);x.forEach(a=>cn[Math.min(k-1,Math.floor((a-min)/w))]++);
+const hist=frame(min,max,0,Math.max(...cn),(sx,sy)=>cn.map((n,i)=>`<rect class="f" x="${sx(min+i*w)+1}" y="${sy(n)}" width="${Math.max(1,sx(min+w)-sx(min)-2)}" height="${sy(0)-sy(n)}"/>`).join(""),4);
+const lo=Math.min(...st.s.filter(a=>a>=st.q1-1.5*st.iqr)),hi=Math.max(...st.s.filter(a=>a<=st.q3+1.5*st.iqr));
+const bx=frame(min,max,0,1,(sx,sy)=>`<rect class="k" x="${sx(st.q1)}" y="${sy(.7)}" width="${sx(st.q3)-sx(st.q1)}" height="${sy(.3)-sy(.7)}"/><line class="l" style="stroke-width:3" x1="${sx(st.med)}" x2="${sx(st.med)}" y1="${sy(.7)}" y2="${sy(.3)}"/><line x1="${sx(lo)}" x2="${sx(st.q1)}" y1="${sy(.5)}" y2="${sy(.5)}" stroke="currentColor"/><line x1="${sx(st.q3)}" x2="${sx(hi)}" y1="${sy(.5)}" y2="${sy(.5)}" stroke="currentColor"/>`+st.s.filter(a=>a<lo||a>hi).map(a=>`<circle class="b" cx="${sx(a)}" cy="${sy(.5)}" r="3.5"/>`).join(""),4,0);
+$("#pl").innerHTML=`<p class="m">Histogram (shape: ${Math.abs(st.sk)<.3?"roughly symmetric":st.sk>0?"right-skewed":"left-skewed"})</p>${hist}<p class="m">Boxplot: box = Q1 to Q3, thick line = median</p>${bx}`}
+else{const f={};v.forEach(a=>f[a]=(f[a]||0)+1);const ks=Object.keys(f),mx=Math.max(...Object.values(f)),n=v.length;
+$("#sm").innerHTML=`<table><tr><th>Category</th><th>Count</th><th>Proportion</th></tr>${ks.map(a=>`<tr><td>${a}</td><td>${f[a]}</td><td><a class="t" data-e="p" data-l="Proportion">${f4(f[a]/n)}</a></td></tr>`).join("")}</table>`;st={n};
+$("#pl").innerHTML=`<p class="m">Bar plot of counts</p>`+frame(0,ks.length,0,mx,(sx,sy)=>ks.map((a,i)=>`<rect class="f" x="${sx(i+.15)}" y="${sy(f[a])}" width="${sx(.7)-sx(0)}" height="${sy(0)-sy(f[a])}"/><text x="${sx(i+.5)}" y="${H-10}" text-anchor="middle">${a}</text>`).join(""),0)}
+scat()}
+function scat(){const a=$("#sx").value,b=$("#sy").value;if(!a||!b||a===b){$("#sc").innerHTML='<p class="m">Needs two different numeric variables.</p>';return}
+const p=cols[a].raw.map((s,i)=>[s,cols[b].raw[i]]).filter(([u,w])=>u!==""&&w!=="").map(([u,w])=>[+u,+w]),n=p.length,mx=p.reduce((s,z)=>s+z[0],0)/n,my=p.reduce((s,z)=>s+z[1],0)/n;
+let sxx=0,syy=0,sxy=0;p.forEach(([u,w])=>{sxx+=(u-mx)**2;syy+=(w-my)**2;sxy+=(u-mx)*(w-my)});
+const r=sxy/Math.sqrt(sxx*syy),sl=sxy/sxx,ic=my-sl*mx;SC={sxx,syy,sxy,r};
+const xs=p.map(z=>z[0]),ys=p.map(z=>z[1]),x0=Math.min(...xs),x1=Math.max(...xs);
+$("#sc").innerHTML=frame(x0,x1,Math.min(...ys),Math.max(...ys),(sx,sy)=>p.map(([u,w])=>`<circle class="f" cx="${sx(u)}" cy="${sy(w)}" r="3.5"/>`).join("")+`<line class="l" x1="${sx(x0)}" y1="${sy(ic+sl*x0)}" x2="${sx(x1)}" y2="${sy(ic+sl*x1)}"/>`,4)+`<p>Correlation r = <a class="t" data-e="r" data-l="Correlation r">${f4(r)}</a> · fitted line: ${b} ≈ ${f2(ic)} + ${f2(sl)}·${a}</p>`}
+$("#ds").onchange=()=>load($("#ds").value);$("#v").onchange=draw;$("#bn").oninput=draw;$("#sx").onchange=$("#sy").onchange=scat;
+$("#up").onchange=e=>{const fl=e.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>{try{DB.up=parse(rd.result);if(!$("#ds option[value=up]"))$("#ds").add(new Option("Uploaded: "+fl.name,"up"));else $("#ds option[value=up]").text="Uploaded: "+fl.name;$("#ds").value="up";load("up")}catch(_){alert("Could not read that CSV.")}};rd.readAsText(fl)};
+load("phones");
+// ---- popups & tabs
+function pop(t,h){$("#mt").textContent=t;$("#mb").innerHTML=h;$("#mo").hidden=false}
+document.addEventListener("click",e=>{const a=e.target.closest("a.t");if(a){if(a.dataset.k){const[t,h]=TERMS[a.dataset.k];pop(t,h)}else pop("Example: "+a.dataset.l,EX[a.dataset.e](a.dataset.e==="p"?st.n:st))}if(e.target.id==="x"||e.target.id==="mo")$("#mo").hidden=true});
+$$("nav button").forEach(b=>b.onclick=()=>{$$("nav button").forEach(z=>z.classList.toggle("on",z===b));["m1","m2","m3","m4","qz"].forEach(i=>$("#"+i).hidden=i!==b.dataset.t);scrollTo(0,0)});
+// ---- Quiz
+const Q=[
+["Experiment: draw one phone from the batch. What is the sample space?",["The 200 phones (all possible outcomes)","Only the 150 iPhones","The number 0.75"],0,"The sample space lists every possible outcome, not a probability or a single event."],
+["A manager ranks the top 3 of 10 phones as gold, silver and bronze. Which counting tool fits?",["Combination C(10,3)","Permutation P(10,3)","Simply 3 × 10"],1,"Order matters, so use permutations: 10·9·8 = 720."],
+["You inspect a random set of 5 phones from 200; the order of picking is irrelevant. Which count gives the number of possible sets?",["200⁵","P(200,5)","C(200,5)"],2,"Unordered, no repeats → combination. P(200,5) counts each set 5! = 120 times."],
+["Events A and B are disjoint. What must be true?",["P(A∩B) = 0","P(A∩B) = P(A)P(B)","P(A|B) = P(A)"],0,"Disjoint means they cannot happen together. The other two describe independence."],
+["In the batch, are “iPhone” and “made in Vietnam” disjoint?",["Yes, a phone has one brand","No, 100 phones are both","Yes, they have different probabilities"],1,"Their intersection has 100 phones, so they overlap."],
+["Which probability equals 100/120?",["P(iPhone | Vietnam)","P(Vietnam | iPhone)","P(iPhone and Vietnam)"],0,"Conditioning on Vietnam shrinks the sample space to 120 phones, 100 of which are iPhones. P(V|I) = 100/150."],
+["P(I) = 0.75 but P(I | V) = 0.83. What does this tell us?",["I and V are independent","I and V are disjoint","Knowing V changes the chance of I, so they are dependent"],2,"Independence would require P(I|V) = P(I)."],
+["Two events with positive probabilities are disjoint. Can they be independent?",["Yes, always","No: if one occurs the other cannot, so P(A∩B)=0 ≠ P(A)P(B)","Only if their probabilities are equal"],1,"The product rule fails because the intersection is empty."],
+["A part comes from Factory 1 or 2, each with a known defect rate. Which rule gives the overall defect probability?",["Bayes formula","Law of total probability","Complement rule"],1,"Σ P(defect | factory) P(factory)."],
+["1% of people have a disease; a test is positive for 95% of the sick and for 5% of the healthy. Given a positive test, P(sick) is closest to",["95%","50%","16%"],2,"0.0095 / (0.0095 + 0.0495) ≈ 0.16. The low base rate matters (Bayes)."],
+["On a probability tree, how do you get the probability of one full path?",["Add the branch probabilities","Multiply the branch probabilities along the path","Take the largest branch"],1,"Later branches are conditional probabilities, so multiply."],
+["Which variable is continuous?",["Defective phones in a box","Calls received per hour","Time until a battery fails"],2,"Time can take any value in an interval; the others are counts."],
+["For a continuous random variable X, P(X = 3) is",["0","f(3)","the mean of X"],0,"Probability is area under the pdf; a single point has zero width."],
+["Uniform on [0, 0.5] has f(x) = 2. Is that a valid pdf?",["No, a density cannot exceed 1","Yes, the area is 2 × 0.5 = 1","Only for discrete variables"],1,"A pdf is a density, not a probability. Only the total area must be 1."],
+["Which of these can NOT be a CDF?",["A smooth curve rising from 0 to 1","A step function rising from 0 to 1","A curve that rises and then falls"],2,"CDFs never decrease."],
+["A fair die has mean 3.5. This means",["3.5 is a possible roll","the average of many rolls approaches 3.5","half of all rolls equal 3.5"],1,"The mean is a long-run average and need not be a possible value."],
+["Var(X) = 4 and Y = 3X + 10. Var(Y) is",["36","46","12"],0,"Shifting does not change spread; scaling multiplies the variance by a² = 9."],
+["X and Y are positively correlated. Compared with Var(X) + Var(Y), Var(X+Y) is",["smaller","equal","larger"],2,"Var(X+Y) = Var X + Var Y + 2Cov(X,Y), and Cov > 0."],
+["Number of phones tested until the first defective one is best modeled as",["Binomial","Geometric","Poisson"],1,"Geometric counts trials until the first success; binomial counts successes in a fixed n."],
+["A count has mean 4 and variance 9. Is a Poisson model plausible?",["Yes, any count is Poisson","No, a Poisson has mean = variance","Yes, if n is large"],1,"Variance much larger than the mean signals extra variability (overdispersion)."],
+["Exponential lifetimes are memoryless. A phone has survived 2 years. Its chance of lasting 1 more year is",["lower than for a new phone","the same as for a new phone","higher than for a new phone"],1,"P(X>3 | X>2) = P(X>1)."],
+["A right-skewed distribution typically has",["mean above median, long right tail","mean below median, long right tail","mean equal to median"],0,"A few large values pull the mean up."],
+["For a normal distribution, roughly what share of values lie within 2 standard deviations of the mean?",["95%","68%","99.7%"],0,"The 68–95–99.7 rule."],
+["Why is correlation often preferred over covariance?",["It is unit-free and bounded by −1 and 1","It is always positive","It proves causation"],0,"Covariance depends on units; correlation is standardised."],
+["Corr(X, Y) = 0. What can we conclude?",["X and Y are independent","There is no linear association, but dependence may remain","Y does not depend on X in any way"],1,"Y = X² with X symmetric about 0 has zero correlation yet is fully dependent."],
+["Given a joint pmf table for X and Y, how do you get the marginal pmf of X?",["Sum each row over all values of Y","Multiply each row by Y","Divide by the grand mean"],0,"Marginalise by summing out the other variable."],
+["Data: 3, 4, 5, 6, 102. Which summary better describes a typical value?",["Median","Mean","Range"],0,"The outlier drags the mean to 24; the median stays at 5."],
+["Why does the sample variance divide by n − 1?",["The mean is estimated from the same data, so deviations are slightly too small","To make variance smaller than the SD","One observation is always discarded"],0,"Dividing by n − 1 removes the bias (unbiased estimator of σ²)."],
+["A boxplot has the median close to Q1 and a long upper whisker. The data are likely",["left-skewed","symmetric","right-skewed"],2,"A compressed lower half and a stretched upper half indicate right skew."],
+["Ice-cream sales and drownings have r = 0.9. Best conclusion?",["Ice cream causes drowning","They move together, perhaps through a lurking variable such as hot weather","The data must be wrong"],1,"Correlation alone does not show causation; confounding is likely."]];
+$("#qz").innerHTML=`<div class="c"><h2>Quiz · 30 questions</h2><p class="m">Concepts and interpretation, not formulas. Answer, then check.</p></div>`+Q.map((z,i)=>`<div class="c"><p><b>${i+1}.</b> ${z[0]}</p>${z[1].map((o,j)=>`<label class="o"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("")}<p class="m" id="w${i}" hidden></p></div>`).join("")+`<p><button id="gr">Check answers</button> <b id="qs"></b></p>`;
+$("#gr").onclick=()=>{let s=0;Q.forEach((z,i)=>{const c=document.querySelector(`input[name=q${i}]:checked`),ok=c&&+c.value===z[2];if(ok)s++;const w=$("#w"+i);w.hidden=false;w.className=ok?"ok":"no";w.textContent=(ok?"Correct. ":"Not quite. ")+z[3]});$("#qs").textContent=`Score: ${s} / 30`};
+// ---- Modules 3-4
+Object.assign(TERMS,{
+srs:["Simple random sample (SRS)","Every possible sample of size n is equally likely, so each unit has the same chance of selection. The standard error formulas assume it; a convenience sample can be biased however large it is."],
+unbiased:["Unbiased estimator","Its average over all possible samples equals the parameter: E(x̄)=μ, E(p̂)=p, E(s²)=σ². Unbiased does not mean any single estimate is right, only that there is no systematic error."],
+se:["Standard error","The standard deviation of an estimator across repeated samples. For x̄ it is σ/√n, estimated by s/√n because σ is unknown. For p̂ it is √(p(1−p)/n). Quadrupling n halves it."],
+clt:["Central Limit Theorem","For large n, x̄ is approximately normal with mean μ and SD σ/√n whatever the population shape. Skewed populations need a larger n."],
+tdist:["t distribution","With σ unknown, (x̄−μ)/(s/√n) follows a t distribution with n−1 df, not a normal, because s changes from sample to sample. Tails are heavier; as df grows it approaches the standard normal."],
+alpha:["Significance level α","The Type I error rate you accept: P(reject H0 when H0 is true). Choose it before seeing the data from the cost of a false alarm: smaller (0.01) when a false positive is costly, larger (0.10) when missing a real effect is costly. 0.05 is a convention, not a law."],
+typeI:["Type I error","Rejecting a true H0 (false alarm). Its probability is α."],
+typeII:["Type II error","Failing to reject a false H0 (missed effect). Its probability is β, and power = 1−β. β shrinks with larger n, larger true effect, larger α and smaller σ."],
+ci:["Confidence interval","Estimate ± critical value × SE. A 95% interval comes from a procedure that captures the true parameter in 95% of repeated samples. Once computed, this interval either contains the parameter or not; 95% describes the method, not this interval."],
+pval:["p-value","Assuming H0 is true, the probability of a test statistic at least as extreme as the one observed. It is not the probability that H0 is true, and not the probability the result is due to chance. A small p means the data would be surprising under H0."],
+citest:["CI and two-sided test","A two-sided level-α test of H0: θ=θ0 rejects exactly when the (1−α) confidence interval excludes θ0. So the CI lists every null value that would not be rejected, and also shows the size of the effect."],
+gof:["Chi-square goodness of fit","One categorical variable. Compares observed counts with those expected under a stated distribution: χ²=Σ(O−E)²/E, df = categories − 1. Needs expected counts of about 5 or more."],
+chiind:["Chi-square test of independence","One sample, two categorical variables. H0: they are independent, so E = row total × column total / n, df = (r−1)(c−1)."],
+homog:["Chi-square test of homogeneity","Separate samples from several populations, one categorical response. H0: the response distribution is the same in every population. Same arithmetic as independence; the sampling design differs."],
+slope:["Slope","In y = b0 + b1x, b1 is the predicted change in y for a one-unit increase in x. With several predictors: for a one-unit increase in that x, holding the others fixed. It describes association, not causation."],
+r2:["R²","Share of the variation in y explained by the model, 1 − SSE/SST. It never falls when predictors are added; adjusted R² penalises useless ones."],
+multicol:["Multicollinearity","Predictors strongly correlated with each other. Slopes become unstable with large SEs and may even change sign, although predictions can stay fine. VIF_j = 1/(1−R²_j) from regressing x_j on the other predictors; above 5–10 is a warning."],
+anova:["One-way ANOVA","Compares k group means. F = MSB/MSW with k−1 and N−k df. H0: all means equal. A small p says at least one mean differs, not which."],
+multtest:["Multiple testing","With m tests at level α the chance of at least one false positive is 1−(1−α)^m. Bonferroni uses α/m per test (or multiplies each p by m), holding the familywise error at α at the cost of power."]});
+const lg=x=>{const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,.1208650973866179e-2,-.5395239384953e-5];let y=x,t=x+5.5;t-=(x+.5)*Math.log(t);let s=1.000000000190015;for(const a of c)s+=a/++y;return -t+Math.log(2.5066282746310005*s/x)};
+function bcf(a,b,x){const tn=1e-30,qab=a+b,qap=a+1,qam=a-1;let c=1,d=1-qab*x/qap;if(Math.abs(d)<tn)d=tn;d=1/d;let h=d;for(let m=1;m<300;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<tn)d=tn;c=1+aa/c;if(Math.abs(c)<tn)c=tn;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<tn)d=tn;c=1+aa/c;if(Math.abs(c)<tn)c=tn;d=1/d;const de=d*c;h*=de;if(Math.abs(de-1)<3e-12)break}return h}
+const bI=(x,a,b)=>{if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lg(a+b)-lg(a)-lg(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*bcf(a,b,x)/a:1-bt*bcf(b,a,1-x)/b};
+const gP=(a,x)=>{if(x<=0)return 0;const pre=Math.exp(-x+a*Math.log(x)-lg(a));if(x<a+1){let s=1/a,t=s;for(let n=1;n<500;n++){t*=x/(a+n);s+=t;if(t<s*1e-14)break}return s*pre}let b=x+1-a,c=1e30,d=1/b,h=d;for(let i=1;i<500;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-30)d=1e-30;c=b+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;const de=d*c;h*=de;if(Math.abs(de-1)<1e-14)break}return 1-pre*h};
+const pn=x=>{const t=1/(1+.3275911*Math.abs(x)/Math.SQRT2),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x/2);return x>=0?.5*(1+y):.5*(1-y)};
+const pt2=(t,v)=>bI(v/(v+t*t),v/2,.5),pc=(x,k)=>1-gP(k/2,x/2),pF=(F,a,b)=>bI(b/(b+a*F),b/2,a/2);
+const bis=(f,lo,hi)=>{for(let i=0;i<70;i++){const m=(lo+hi)/2;f(m)>0?lo=m:hi=m}return(lo+hi)/2};
+const tcrit=(c,v)=>bis(t=>pt2(t,v)-(1-c),0,1e4),zcrit=c=>bis(z=>2*(1-pn(z))-(1-c),0,10);
+const rn=()=>Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(2*Math.PI*Math.random());
+const POP={"Normal":rn,"Uniform":()=>(Math.random()-.5)*Math.sqrt(12),"Right-skewed (exponential)":()=>-Math.log(1-Math.random())-1,"Left-skewed":()=>Math.log(1-Math.random())+1,"Strongly right-skewed (lognormal)":()=>(Math.exp(rn())-1.6487)/2.161};
+const mean=a=>a.reduce((s,v)=>s+v,0)/a.length,sdv=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1))};
+const skw=a=>{const m=mean(a),s=sdv(a);return mean(a.map(v=>((v-m)/s)**3))},sl=s=>Math.abs(s)<.3?"roughly symmetric":s>0?"right-skewed":"left-skewed";
+const hs=(a,k=30)=>{const mn=Math.min(...a),mx=Math.max(...a),w=(mx-mn)/k||1,c=Array(k).fill(0);a.forEach(v=>c[Math.min(k-1,Math.floor((v-mn)/w))]++);const my=Math.max(...c)/a.length;return frame(mn,mx,0,my,(sx,sy)=>c.map((n,i)=>`<rect class="f" x="${sx(mn+i*w)+.5}" y="${sy(n/a.length)}" width="${Math.max(1,sx(mn+w)-sx(mn)-1)}" height="${sy(0)-sy(n/a.length)}"/>`).join(""),4)};
+const num=s=>s.split(/[,\s]+/).filter(Boolean).map(Number);
+function welch(a,b){const n1=a.length,n2=b.length,m1=mean(a),m2=mean(b),v1=sdv(a)**2/n1,v2=sdv(b)**2/n2,se=Math.sqrt(v1+v2),df=(v1+v2)**2/(v1*v1/(n1-1)+v2*v2/(n2-1));return{d:m1-m2,se,df,m1,m2}}
+$("#m3").innerHTML=T(`
+<div class="c"><h2>3.1 Sampling distributions</h2><p>Draw many [srs|simple random samples] and watch how a statistic varies. [unbiased|Unbiased] estimators centre on the parameter; the spread is the [se|standard error]; the [clt|CLT] makes the shape normal as n grows, faster for symmetric populations.</p>
+<h3>Sample mean x̄</h3><p>Population: <select id="zpo">${Object.keys(POP).map(k=>`<option>${k}</option>`).join("")}</select></p>
+<p><label>μ <b id="zvm"></b> <input id="zm" type="range" min="0" max="100" value="50"></label> <label>σ <b id="zvs"></b> <input id="zs" type="range" min="1" max="30" value="10"></label> <label>n <b id="zvn"></b> <input id="zn" type="range" min="1" max="200" value="10"></label></p><div id="zo1"></div>
+<h3>Sample proportion p̂</h3><p><label>p <b id="zvp"></b> <input id="zp" type="range" min="0.01" max="0.99" step="0.01" value="0.3"></label> <label>n <b id="zvq"></b> <input id="zq" type="range" min="5" max="200" value="20"></label></p><div id="zo2"></div></div>
+<div class="c"><h2>3.2 The t distribution</h2><p>We never assume σ is known: we estimate it by s, and standardising with s gives a [tdist|t distribution] with n−1 degrees of freedom. df = <b id="zdv"></b> <input id="zdf" type="range" min="1" max="100" value="3"></p><div id="ztp"></div></div>
+<div class="c"><h2>3.3 Inference for one and two samples</h2><p>Means use t (two samples: Welch, which does not assume equal variances); proportions use z. Edit the data or switch the method.</p>
+<p><select id="zim"><option value="1m">One mean (t)</option><option value="2m">Two means (Welch t)</option><option value="1p">One proportion (z)</option><option value="2p">Two proportions (z)</option></select> confidence <select id="zic"><option value=".9">90%</option><option value=".95" selected>95%</option><option value=".99">99%</option></select> <span id="zhl"></span> <input id="zi0" type="number" step="any"></p>
+<p class="m" id="zla"></p><input type="text" id="zia"><p class="m" id="zlb"></p><input type="text" id="zib"><div id="zio"></div>
+<h3>Interpreting intervals</h3><p>True μ = 50, σ = 10, n = 10, t-intervals at the level above. <button id="zcb">Simulate 50 intervals</button></p><div id="zco"></div></div>
+<div class="c"><h2>3.4 Errors, power and the choice of α</h2><p>[typeI|Type I error] has probability [alpha|α]; [typeII|Type II error] has probability β. Two-sided test of H0: μ = 0 when the true mean is δ (σ is a planning value here).</p>
+<p><label>α <b id="zwa_"></b> <input id="zwa" type="range" min="0.01" max="0.2" step="0.01" value="0.05"></label> <label>n <b id="zwn_"></b> <input id="zwn" type="range" min="5" max="200" value="30"></label> <label>δ <b id="zwd_"></b> <input id="zwd" type="range" min="0" max="10" step="0.5" value="3"></label> <label>σ <b id="zws_"></b> <input id="zws" type="range" min="1" max="20" value="10"></label></p><div id="zwo"></div><p class="m">Dashed: sampling distribution of x̄ under H0. Solid: under the true mean. Red: Type I region. Blue: Type II region.</p></div>
+<div class="c"><h2>3.5 Chi-square tests</h2><p><select id="zcm"><option value="g">Goodness of fit</option><option value="i">Independence</option><option value="h">Homogeneity</option></select> [gof|GOF], [chiind|independence], [homog|homogeneity]</p><p class="m" id="zcd"></p><p>Counts (rows on separate lines, cells separated by commas):</p><textarea id="zct" rows="3"></textarea><p id="zcpw">Null proportions (relative weights): <input type="text" id="zcp"></p><div id="zco2"></div></div>`);
+function sim1(){const pop=POP[$("#zpo").value],mu=+$("#zm").value,sg=+$("#zs").value,n=+$("#zn").value;$("#zvm").textContent=mu;$("#zvs").textContent=sg;$("#zvn").textContent=n;
+const Pp=Array.from({length:3000},()=>mu+sg*pop()),M=Array.from({length:2000},()=>{let s=0;for(let i=0;i<n;i++)s+=pop();return mu+sg*s/n});
+$("#zo1").innerHTML=`<p class="m">Population (3000 draws)</p>${hs(Pp)}<p class="m">Sampling distribution of x̄ from 2000 samples of size ${n} (note the different x-axis)</p>${hs(M)}<p>Mean of x̄ = <b>${f2(mean(M))}</b> (μ = ${mu}); SD of x̄ = <b>${f2(sdv(M))}</b> vs σ/√n = <b>${f2(sg/Math.sqrt(n))}</b>. Population is ${sl(skw(Pp))}; x̄ is ${sl(skw(M))}.</p>`}
+function sim2(){const p=+$("#zp").value,n=+$("#zq").value;$("#zvp").textContent=p;$("#zvq").textContent=n;const Hh=Array.from({length:2000},()=>{let c=0;for(let i=0;i<n;i++)if(Math.random()<p)c++;return c/n}),ok=n*p>=10&&n*(1-p)>=10;
+$("#zo2").innerHTML=hs(Hh,Math.min(30,n+1))+`<p>Mean of p̂ = <b>${f2(mean(Hh))}</b> (p = ${p}); SD of p̂ = <b>${f2(sdv(Hh))}</b> vs √(p(1−p)/n) = <b>${f2(Math.sqrt(p*(1-p)/n))}</b>. np = ${f2(n*p)}, n(1−p) = ${f2(n*(1-p))}: normal approximation ${ok?"reasonable":"poor (both should be at least 10)"}; shape is ${sl(skw(Hh))}.</p>`}
+["zpo","zm","zs","zn"].forEach(i=>$("#"+i).oninput=sim1);["zp","zq"].forEach(i=>$("#"+i).oninput=sim2);
+function tpl(){const v=+$("#zdf").value;$("#zdv").textContent=v;const tp=x=>Math.exp(lg((v+1)/2)-lg(v/2))/Math.sqrt(v*Math.PI)*(1+x*x/v)**(-(v+1)/2),np=x=>Math.exp(-x*x/2)/Math.sqrt(2*Math.PI),xs=Array.from({length:161},(_,i)=>-4+i*.05),D=[1,2,5,10,30,100,1000];
+$("#ztp").innerHTML=frame(-4,4,0,.42,(sx,sy)=>`<polyline class="k" style="stroke-dasharray:4 3" points="${xs.map(x=>sx(x)+","+sy(np(x))).join(" ")}"/><polyline class="l" points="${xs.map(x=>sx(x)+","+sy(tp(x))).join(" ")}"/>`,4)+`<p class="m">Solid: t with ${v} df. Dashed: standard normal.</p><p>95% critical value: t* = <b>${f4(tcrit(.95,v))}</b> vs z* = <b>1.9600</b>. Small df means heavy tails and wider intervals, the price of estimating σ.</p><div class="w"><table><tr><th>df</th>${D.map(d=>`<th>${d}</th>`).join("")}<th>∞ (normal)</th></tr><tr><th>t* (95%)</th>${D.map(d=>`<td>${f2(tcrit(.95,d))}</td>`).join("")}<td>1.96</td></tr></table></div>`}
+$("#zdf").oninput=tpl;
+const ID={"1m":{a:"20,22,24,26,18,23",b:"",h:20,la:"Sample values (iPhone battery hours)",lb:"",hl:"H0: μ ="},"2m":{a:"20,22,24,26,18,23",b:"19,21,24,16,20,22,18,17,19,15,21,15",h:0,la:"Group 1 values (iPhone battery hours)",lb:"Group 2 values (other phones)",hl:"H0: μ1−μ2 ="},"1p":{a:"45,60",b:"",h:.5,la:"successes, n (e.g. 45 of 60 prefer product A)",lb:"",hl:"H0: p ="},"2p":{a:"100,120",b:"50,80",h:0,la:"Group 1: iPhones, batch size (Vietnam-made)",lb:"Group 2: iPhones, batch size (made elsewhere)",hl:"H0: p1−p2 = 0"}};
+function imode(){const d=ID[$("#zim").value];$("#zia").value=d.a;$("#zib").value=d.b;$("#zi0").value=d.h;$("#zla").textContent=d.la;$("#zlb").textContent=d.lb;$("#zhl").textContent=d.hl;$("#zi0").hidden=$("#zim").value=="2p";$("#zib").hidden=!d.b&&$("#zim").value[1]=="m"&&$("#zim").value=="1m"||$("#zim").value=="1p";$("#zlb").hidden=$("#zib").hidden;inf()}
+function inf(){const m=$("#zim").value,cf=+$("#zic").value,al=1-cf,h=m=="2p"?0:+$("#zi0").value,A=num($("#zia").value),Bv=num($("#zib").value);let est,se,stat,df="–",p,lo,hi,sn,nm,ok=1;
+try{if(m=="1m"){if(A.length<2)throw 0;se=sdv(A)/Math.sqrt(A.length);est=mean(A);df=A.length-1;stat=(est-h)/se;p=pt2(stat,df);const c=tcrit(cf,df);lo=est-c*se;hi=est+c*se;sn="t";nm="μ"}
+else if(m=="2m"){if(A.length<2||Bv.length<2)throw 0;const w=welch(A,Bv);est=w.d;se=w.se;df=w.df;stat=(est-h)/se;p=pt2(stat,df);const c=tcrit(cf,df);lo=est-c*se;hi=est+c*se;sn="t";nm="μ1−μ2"}
+else if(m=="1p"){const[x,n]=A;est=x/n;se=Math.sqrt(est*(1-est)/n);stat=(est-h)/Math.sqrt(h*(1-h)/n);p=2*(1-pn(Math.abs(stat)));const c=zcrit(cf);lo=est-c*se;hi=est+c*se;sn="z";nm="p"}
+else{const[x1,n1]=A,[x2,n2]=Bv,p1=x1/n1,p2=x2/n2,pp=(x1+x2)/(n1+n2);est=p1-p2;se=Math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2);stat=est/Math.sqrt(pp*(1-pp)*(1/n1+1/n2));p=2*(1-pn(Math.abs(stat)));const c=zcrit(cf);lo=est-c*se;hi=est+c*se;sn="z";nm="p1−p2"}
+if(!isFinite(p+lo))throw 0}catch(e){$("#zio").innerHTML="<p class=no>Check the inputs.</p>";return}
+const rej=p<al,inc=lo<=h&&h<=hi,nul=m=="2p"?0:h;
+$("#zio").innerHTML=`<table><tr><th>Estimate</th><th>[se|SE]</th><th>${sn}</th><th>df</th><th>[pval|p-value]</th><th>${cf*100}% [ci|CI]</th></tr><tr><td>${f4(est)}</td><td>${f4(se)}</td><td>${f4(stat)}</td><td>${df=="–"?df:f2(df)}</td><td>${f4(p)}</td><td>${f4(lo)} to ${f4(hi)}</td></tr></table>`.replace(/\[(\w+)\|([^\]]+)\]/g,'<a class="t" data-k="$1">$2</a>')+`<p>At α = ${f2(al)}: p ${rej?"is below":"is not below"} α, so we <b>${rej?"reject":"fail to reject"}</b> H0 (${nm} = ${nul}). The interval ${inc?"contains":"excludes"} ${nul}, which agrees (<a class="t" data-k="citest">CI ⇔ two-sided test</a>${m[1]=="p"?"; for proportions the match is approximate because the test and the interval use different standard errors":""}).</p>`}
+$("#zim").onchange=imode;["zic","zi0","zia","zib"].forEach(i=>$("#"+i).oninput=inf);$("#zic").onchange=inf;
+$("#zcb").onclick=()=>{const cf=+$("#zic").value,n=10,mu=50,c=tcrit(cf,n-1),LL=[];let hit=0;for(let i=0;i<50;i++){const x=Array.from({length:n},()=>mu+10*rn()),e=c*sdv(x)/Math.sqrt(n),m=mean(x);LL.push([m-e,m+e]);if(m-e<=mu&&mu<=m+e)hit++}
+$("#zco").innerHTML=frame(30,70,0,51,(sx,sy)=>`<line x1="${sx(mu)}" x2="${sx(mu)}" y1="${sy(0)}" y2="${sy(51)}" stroke="currentColor" style="stroke-dasharray:4 3"/>`+LL.map(([a,b],i)=>`<line ${a<=mu&&mu<=b?'class="l"':'style="stroke:var(--bad);stroke-width:2"'} x1="${sx(a)}" x2="${sx(b)}" y1="${sy(i+1)}" y2="${sy(i+1)}"/>`).join(""),4,0)+`<p>${hit} of 50 intervals contain μ = 50 (${f2(hit/.5)}%); misses are red. Expect about ${cf*100}% in the long run, but any single interval either captures μ or not.</p>`};
+const pdN=(x,m,s)=>Math.exp(-(((x-m)/s)**2)/2)/(s*Math.sqrt(2*Math.PI));
+function pw(){const al=+$("#zwa").value,n=+$("#zwn").value,d=+$("#zwd").value,sg=+$("#zws").value;[["zwa_",al],["zwn_",n],["zwd_",d],["zws_",sg]].forEach(([i,v])=>$("#"+i).textContent=v);
+const se=sg/Math.sqrt(n),c=zcrit(1-al)*se,be=pn((c-d)/se)-pn((-c-d)/se),lo=-4*se,hi=d+4*se,my=pdN(0,0,se)*1.05,pl=(f,a,b,sx,sy,st)=>{const pts=Array.from({length:41},(_,i)=>{const x=a+(b-a)*i/40;return sx(x)+","+sy(f(x))}).join(" ");return `<polygon points="${sx(a)},${sy(0)} ${pts} ${sx(b)},${sy(0)}" style="${st};opacity:.45"/>`},f0=x=>pdN(x,0,se),f1=x=>pdN(x,d,se),xs=Array.from({length:201},(_,i)=>lo+(hi-lo)*i/200);
+$("#zwo").innerHTML=frame(lo,hi,0,my,(sx,sy)=>pl(f1,-c,c,sx,sy,"fill:var(--ac)")+pl(f0,c,hi,sx,sy,"fill:var(--bad)")+pl(f0,lo,-c,sx,sy,"fill:var(--bad)")+`<polyline class="k" style="stroke-dasharray:4 3" points="${xs.map(x=>sx(x)+","+sy(f0(x))).join(" ")}"/><polyline class="l" points="${xs.map(x=>sx(x)+","+sy(f1(x))).join(" ")}"/>`,4,0)+`<p>Type I rate α = <b>${al}</b> · Type II rate β = <b>${f2(be)}</b> · power = <b>${f2(1-be)}</b>. Shrinking α cuts false alarms but raises β; more data (larger n) or a bigger effect raises power.</p>`}
+["zwa","zwn","zwd","zws"].forEach(i=>$("#"+i).oninput=pw);
+const CD={g:["18,22,16,25,19,20","1,1,1,1,1,1","A die is rolled 120 times (counts for faces 1 to 6). H0: the die is fair, all faces equally likely."],i:["100,50\n20,30","","One batch of 200 phones cross-classified by type (rows: iPhone, other) and origin (columns: Vietnam, elsewhere). H0: type and origin are independent."],h:["30,45,25\n20,40,40","","Satisfaction counts (low, medium, high) from separate samples of customers at two stores (rows). H0: the satisfaction distribution is the same at both stores."]};
+function cmode(){const d=CD[$("#zcm").value];$("#zct").value=d[0];$("#zcp").value=d[1];$("#zcd").textContent=d[2];$("#zcpw").hidden=$("#zcm").value!="g";chi()}
+function chi(){const m=$("#zcm").value,R2=$("#zct").value.trim().split(/\n/).map(num);let E,df,x2,h;
+try{if(m=="g"){const o=R2[0],pr=num($("#zcp").value),sp=pr.reduce((a,b)=>a+b),n=o.reduce((a,b)=>a+b);if(pr.length!=o.length)throw 0;E=pr.map(v=>n*v/sp);df=o.length-1;x2=o.reduce((s,v,i)=>s+(v-E[i])**2/E[i],0);h=`<table><tr><th>Category</th>${o.map((_,i)=>`<th>${i+1}</th>`).join("")}</tr><tr><th>Observed</th>${o.map(v=>`<td>${v}</td>`).join("")}</tr><tr><th>Expected</th>${E.map(v=>`<td>${f2(v)}</td>`).join("")}</tr><tr><th>(O−E)²/E</th>${o.map((v,i)=>`<td>${f2((v-E[i])**2/E[i])}</td>`).join("")}</tr></table>`;E=[E]}
+else{const rt=R2.map(r=>r.reduce((a,b)=>a+b)),ct=R2[0].map((_,j)=>R2.reduce((s,r)=>s+r[j],0)),n=rt.reduce((a,b)=>a+b);E=R2.map((r,i)=>r.map((_,j)=>rt[i]*ct[j]/n));df=(R2.length-1)*(R2[0].length-1);x2=R2.reduce((s,r,i)=>s+r.reduce((t,v,j)=>t+(v-E[i][j])**2/E[i][j],0),0);h=`<p class="m">Expected counts (row total × column total / n)</p><table>${E.map(r=>`<tr>${r.map(v=>`<td>${f2(v)}</td>`).join("")}</tr>`).join("")}</table>`}
+if(!isFinite(x2)||df<1)throw 0}catch(e){$("#zco2").innerHTML="<p class=no>Check the counts.</p>";return}
+const p=pc(x2,df),small=Math.min(...E.flat())<5,txt={g:"the data are inconsistent with the stated distribution",i:"the variables appear associated",h:"the populations differ in their distributions"};
+$("#zco2").innerHTML=h+`<p>χ² = <b>${f4(x2)}</b>, df = <b>${df}</b>, p-value = <b>${f4(p)}</b>. At α = 0.05 ${p<.05?"reject H0: "+txt[m]:"fail to reject H0: no convincing evidence that "+txt[m].replace("the data are inconsistent with","the data are inconsistent with")}.${small?' <span class="no">Some expected counts are below 5, so the approximation is shaky.</span>':""}</p>`}
+$("#zcm").onchange=cmode;$("#zct").oninput=$("#zcp").oninput=chi;
+// Module 4
+DB.methods=parse("method,score\nA,72\nA,75\nA,78\nA,70\nA,74\nA,77\nB,80\nB,83\nB,79\nB,85\nB,82\nB,81\nC,76\nC,78\nC,81\nC,79\nC,74\nC,80");
+$("#m4").innerHTML=T(`<div class="c"><h2>4.1 Linear regression</h2><p>Fit y on one or several numeric predictors. Read each [slope|slope], the [r2|R²], and check [multicol|multicollinearity] with the VIF. Try price ~ storage, then add battery: storage and battery move together, so slopes and SEs change.</p><p>Data <select id="zrd"></select> response y <select id="zry"></select></p><p>Predictors: <span id="zrx"></span></p><div id="zdr" class="tex2jax_ignore"></div><div id="zro"></div></div>
+<div class="c"><h2>4.2 One-way ANOVA and multiple testing</h2><p>[anova|ANOVA] compares several group means with one F test. Data <select id="zad"></select> factor <select id="zaf"></select> response <select id="zay"></select></p><div id="zda" class="tex2jax_ignore"></div><div id="zao"></div>
+<h3>Why adjust for [multtest|multiple testing]?</h3><p>α <select id="zma"><option>0.05</option><option>0.01</option></select> tests m = <b id="zmv"></b> <input id="zmm" type="range" min="1" max="50" value="10"></p><p id="zmo"></p></div>`);
+function ols(X,y){const n=X.length,p=X[0].length,A=Array.from({length:p},(_,i)=>Array.from({length:p},(_,j)=>X.reduce((s,r)=>s+r[i]*r[j],0))),b=Array.from({length:p},(_,i)=>X.reduce((s,r,k)=>s+r[i]*y[k],0)),M=A.map((r,i)=>[...r,...Array.from({length:p},(_,j)=>+(i===j))]);
+for(let i=0;i<p;i++){let m=i;for(let r=i+1;r<p;r++)if(Math.abs(M[r][i])>Math.abs(M[m][i]))m=r;[M[i],M[m]]=[M[m],M[i]];const d=M[i][i];if(Math.abs(d)<1e-9)return null;for(let j=0;j<2*p;j++)M[i][j]/=d;for(let r=0;r<p;r++)if(r!==i){const f=M[r][i];for(let j=0;j<2*p;j++)M[r][j]-=f*M[i][j]}}
+const inv=M.map(r=>r.slice(p)),beta=inv.map(r=>r.reduce((s,v,j)=>s+v*b[j],0)),fit=X.map(r=>r.reduce((s,v,j)=>s+v*beta[j],0)),res=y.map((v,i)=>v-fit[i]),sse=res.reduce((s,e)=>s+e*e,0),my=mean(y),sst=y.reduce((s,v)=>s+(v-my)**2,0);return{beta,inv,fit,res,sse,sst,n,p,r2:1-sse/sst}}
+function fillDS(){const ks=Object.keys(DB);for(const id of["#zrd","#zad"]){const s=$(id),cur=s.value;s.innerHTML=ks.map(k=>`<option value="${k}">${k=="up"?"uploaded":k}</option>`).join("");s.value=ks.includes(cur)?cur:(id=="#zad"?"methods":"phones")}rsetup();asetup()}
+function rsetup(){const c=DB[$("#zrd").value],nn=Object.keys(c).filter(k=>c[k].num);$("#zry").innerHTML=nn.map(k=>`<option>${k}</option>`).join("");$("#zry").value=nn.includes("price")?"price":nn[nn.length-1];rpred()}
+function rpred(){const c=DB[$("#zrd").value],y=$("#zry").value,nn=Object.keys(c).filter(k=>c[k].num&&k!=y);$("#zrx").innerHTML=nn.map((k,i)=>`<label><input type="checkbox" value="${k}" ${i?"":"checked"}> ${k}</label> `).join("");$$("#zrx input").forEach(i=>i.onchange=reg);reg()}
+function reg(){const c=DB[$("#zrd").value],y=$("#zry").value,xs=$$("#zrx input:checked").map(i=>i.value),o_=$("#zro");if(!xs.length){o_.innerHTML='<p class="m">Pick at least one predictor.</p>';return}
+const ix=c[y].raw.map((_,i)=>[y,...xs].every(v=>c[v].raw[i]!==""&&isFinite(c[v].raw[i]))?i:-1).filter(i=>i>=0),Y=ix.map(i=>+c[y].raw[i]),X=ix.map(i=>[1,...xs.map(v=>+c[v].raw[i])]),o=X.length>xs.length+1?ols(X,Y):null;
+if(!o){o_.innerHTML='<p class="no">Cannot fit: too few rows or perfectly collinear predictors (perfect multicollinearity).</p>';return}
+const df=o.n-o.p,s2=o.sse/df,adj=1-(1-o.r2)*(o.n-1)/df,F=((o.sst-o.sse)/(o.p-1))/s2,nm=["Intercept",...xs],co=o.beta.map((b,j)=>{const se=Math.sqrt(s2*o.inv[j][j]);return[b,se,b/se,pt2(b/se,df)]});
+let vif=xs.map(()=>"–");if(xs.length>1)vif=xs.map((_,j)=>{const o2=ols(X.map(r=>[1,...r.slice(1).filter((_,k)=>k!=j)]),X.map(r=>r[j+1]));return o2?1/(1-o2.r2):Infinity});
+let pl="";const fm=o.fit,rs=o.res;if(xs.length==1){const xv=X.map(r=>r[1]),x0=Math.min(...xv),x1=Math.max(...xv);pl=frame(x0,x1,Math.min(...Y),Math.max(...Y),(sx,sy)=>xv.map((v,i)=>`<circle class="f" cx="${sx(v)}" cy="${sy(Y[i])}" r="3.5"/>`).join("")+`<line class="l" x1="${sx(x0)}" x2="${sx(x1)}" y1="${sy(o.beta[0]+o.beta[1]*x0)}" y2="${sy(o.beta[0]+o.beta[1]*x1)}"/>`,4)+`<p class="m">Data and fitted line</p>`}
+const f0=Math.min(...fm),f1=Math.max(...fm),r0=Math.min(...rs),r1=Math.max(...rs);pl+=frame(f0,f1,r0,r1,(sx,sy)=>`<line x1="${sx(f0)}" x2="${sx(f1)}" y1="${sy(0)}" y2="${sy(0)}" stroke="currentColor" style="stroke-dasharray:4 3"/>`+fm.map((v,i)=>`<circle class="f" cx="${sx(v)}" cy="${sy(rs[i])}" r="3.5"/>`).join(""),4)+`<p class="m">Residuals vs fitted values: look for curvature or a funnel shape</p>`;
+o_.innerHTML=`<div class="w"><table><tr><th></th><th>Estimate</th><th>SE</th><th>t</th><th>p</th><th>VIF</th></tr>${co.map((r,j)=>`<tr><th>${nm[j]}</th><td>${f2(r[0])}</td><td>${f2(r[1])}</td><td>${f2(r[2])}</td><td>${f4(r[3])}</td><td>${j?(vif[j-1]>10?'<b class="no">'+f2(vif[j-1])+"</b>":(typeof vif[j-1]=="number"?f2(vif[j-1]):"–")):""}</td></tr>`).join("")}</table></div>
+<p>n = ${o.n}, residual SE = ${f2(Math.sqrt(s2))}, R² = <b>${f4(o.r2)}</b>, adjusted R² = ${f4(adj)}, overall F = ${f2(F)} on ${o.p-1} and ${df} df (p = ${f4(pF(F,o.p-1,df))}).</p><ul>${xs.map((v,j)=>`<li>${v}: each +1 changes predicted ${y} by <b>${f2(co[j+1][0])}</b>${xs.length>1?", holding the other predictors fixed":""}.</li>`).join("")}<li>The model explains ${f2(o.r2*100)}% of the variation in ${y}.</li></ul>${xs.length>1&&vif.some(v=>v>5)?'<p class="no">VIF above 5: predictors overlap heavily, so individual slopes are unstable even if R² is high.</p>':""}${pl}`}
+function asetup(){const c=DB[$("#zad").value],ks=Object.keys(c),ct=ks.filter(k=>!c[k].num),nn=ks.filter(k=>c[k].num);$("#zaf").innerHTML=ct.map(k=>`<option>${k}</option>`).join("");$("#zay").innerHTML=nn.map(k=>`<option>${k}</option>`).join("");$("#zay").value=nn.includes("price")?"price":nn[nn.length-1];anova()}
+function anova(){const c=DB[$("#zad").value],f=$("#zaf").value,y=$("#zay").value,o_=$("#zao");if(!c[f]||!c[y]){o_.innerHTML='<p class="m">Needs a categorical factor and a numeric response.</p>';return}
+const G={};c[f].raw.forEach((g,i)=>{const v=c[y].raw[i];if(g!==""&&v!==""&&isFinite(v))(G[g]=G[g]||[]).push(+v)});const ks=Object.keys(G),k=ks.length,all=ks.flatMap(g=>G[g]),N=all.length,gm=mean(all);
+if(k<2||N-k<1){o_.innerHTML='<p class="m">Need at least 2 groups and more observations than groups.</p>';return}
+const ssb=ks.reduce((s,g)=>s+G[g].length*(mean(G[g])-gm)**2,0),ssw=ks.reduce((s,g)=>s+G[g].reduce((t,v)=>t+(v-mean(G[g]))**2,0),0),msb=ssb/(k-1),msw=ssw/(N-k),F=msb/msw,p=pF(F,k-1,N-k),pr=[];
+for(let i=0;i<k;i++)for(let j=i+1;j<k;j++){const a=G[ks[i]],b=G[ks[j]];if(a.length>1&&b.length>1){const w=welch(a,b);pr.push([ks[i]+" vs "+ks[j],w.d,pt2(w.d/w.se,w.df)])}}
+const m=pr.length;o_.innerHTML=`<table><tr><th>Group</th><th>n</th><th>Mean</th><th>SD</th></tr>${ks.map(g=>`<tr><td>${g}</td><td>${G[g].length}</td><td>${f2(mean(G[g]))}</td><td>${G[g].length>1?f2(sdv(G[g])):"–"}</td></tr>`).join("")}</table>
+<table><tr><th>Source</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>p</th></tr><tr><td>Between</td><td>${f2(ssb)}</td><td>${k-1}</td><td>${f2(msb)}</td><td>${f2(F)}</td><td>${f4(p)}</td></tr><tr><td>Within</td><td>${f2(ssw)}</td><td>${N-k}</td><td>${f2(msw)}</td><td></td><td></td></tr></table>
+<p>${p<.05?"Reject H0 at 0.05: at least one group mean differs.":"Fail to reject H0 at 0.05: no convincing evidence that the means differ."} η² = ${f2(ssb/(ssb+ssw))} of the variation lies between groups.</p>${m?`<p class="m">Follow-up: ${m} pairwise Welch t-tests (groups with at least 2 values). Bonferroni multiplies each p by ${m}.</p><table><tr><th>Pair</th><th>Diff</th><th>Raw p</th><th>Bonferroni p</th></tr>${pr.map(r=>`<tr><td>${r[0]}</td><td>${f2(r[1])}</td><td>${f4(r[2])}</td><td>${f4(Math.min(1,r[2]*m))}${Math.min(1,r[2]*m)<.05?" *":""}</td></tr>`).join("")}</table>`:""}`}
+function mt(){const m=+$("#zmm").value,a=+$("#zma").value;$("#zmv").textContent=m;$("#zmo").innerHTML=`Chance of at least one false positive if every null is true: 1−(1−${a})<sup>${m}</sup> = <b>${f2((1-(1-a)**m)*100)}%</b>. Bonferroni tests each at α/m = <b>${f4(a/m)}</b> to keep the familywise rate at ${a}.`}
+$("#zrd").onchange=rsetup;$("#zry").onchange=rpred;$("#zad").onchange=asetup;$("#zaf").onchange=$("#zay").onchange=anova;$("#zmm").oninput=$("#zma").onchange=mt;
+$$("nav button").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.t=="m4")fillDS()}));
+sim1();sim2();tpl();imode();pw();cmode();fillDS();mt();
+// ---- Per-module quizzes (question|a|b|c|answer index|explanation)
+const pq=s=>{const p=s.split("|");return[p[0],[p[1],p[2],p[3]],+p[4],p[5]]};
+const X1=[
+"A phone comes in 4 colours and 3 storage sizes. The number of configurations is|12, since each colour can be paired with each size|7, since we pick one attribute or the other|3, since sizes decide everything|0|Independent choices multiply (multiplication rule).",
+"P(A) = 0.3, P(B) = 0.5 and P(A and B) = 0.1. P(A or B) is|0.8|0.7|0.65|1|Add and subtract the overlap: 0.3 + 0.5 − 0.1 = 0.7.",
+"You inspect 10 phones drawn without replacement from a batch of 20. Which binomial assumption fails?|Independence of trials|A fixed number of trials|Two outcomes per trial|0|Removing items changes later probabilities. Binomial is only a good approximation when the sample is a tiny share of the batch.",
+"For independent X and Y, Var(X+Y) equals|Var(X) − Var(Y)|Var(X) + Var(Y)|Var(X) × Var(Y)|1|Covariance is zero, so variances add; they never subtract."];
+const X2=[
+"Zip codes and jersey numbers are best treated as|categorical labels, not numbers to average|continuous numeric variables|ordinal ranks|0|Numbers used as labels have no numeric meaning.",
+"Satisfaction rated Low, Medium or High is|nominal|ordinal|continuous|1|Categories have a natural order but unequal gaps.",
+"Which plot suits a categorical variable?|Histogram|Bar plot|Scatter plot|1|Bar plots show counts per category; histograms bin numbers.",
+"Changing the number of histogram bins can|alter the data|change the apparent shape, so try several|change the mean|1|Too few bins hide features and too many show noise; the data stay the same.",
+"A histogram has a long right tail. Most likely|mean is greater than median|mean is less than median|mean equals mode|0|Large values pull the mean up; the median resists.",
+"One CEO is paid 50 times the median salary. Which spread measure ignores this?|Range|Standard deviation|IQR|2|The IQR uses only the middle half of the data.",
+"Why is the standard deviation easier to interpret than the variance?|It is always smaller|It has the same units as the data|It is never affected by outliers|1|Variance is in squared units.",
+"Every value in a data set is increased by 10. Then|mean and SD both rise by 10|the mean rises by 10 and the SD is unchanged|the median is unchanged|1|Shifting moves location, not spread.",
+"Every value is multiplied by 2. The standard deviation|doubles|stays the same|quadruples|0|Scaling by c scales the SD by the absolute value of c (the variance by c squared).",
+"A z-score of −1.5 means the observation is|1.5 SDs below the mean|1.5 units below the mean|1.5 below the median|0|z = (x − mean)/SD counts standard deviations.",
+"Bell-shaped data have mean 70 and SD 5. About what share lies between 60 and 80?|68%|95%|99.7%|1|That is mean ± 2 SD, so the empirical rule gives about 95%.",
+"A boxplot shows a point beyond the upper whisker. It is|an error to delete|a potential outlier worth investigating|the maximum by definition|1|Points beyond 1.5 IQR from the box are flagged; investigate before deciding.",
+"Two boxplots have equal medians, but one box is twice as tall. The taller box shows|greater spread in the middle half|a greater mean|a lower variance|0|Box height is the IQR.",
+"Two data sets both have mean 50 and median 50, with SD 2 and SD 20. What differs?|Centre|Spread|Skewness must differ|1|Same centre, different variability.",
+"The sample 2, 2, 2, 2, 2 has standard deviation|2|0|undefined|1|There is no variation, so every deviation is zero.",
+"The first quartile Q1 is|the value with about 25% of the data below it|the mean of the lower half|the smallest value|0|Quartiles split the ordered data into quarters.",
+"A scatter plot shows a strong U-shaped curve. The correlation r is probably|near +1|near 0 even though the relationship is strong|near −1|1|r measures linear association only.",
+"One extreme point far from the others is added to a scatter plot. Correlation|stays unchanged|can change a lot|is only affected in sign|1|r is sensitive to outliers, so inspect the plot.",
+"Heights are measured in cm instead of inches. The correlation with weight|changes sign|stays the same|is multiplied by 2.54|1|r is unit-free.",
+"Within each of two groups x and y are positively related, but pooled they are negatively related. This is|Simpson’s paradox: a lurking group variable reverses the trend|a calculation error|impossible|0|Always check for hidden subgroups.",
+"A survey of gym visitors asks about exercise habits. The main problem is|small n|selection bias|measurement units|1|The sample does not represent the population, and more data would not fix that.",
+"A proportion of 0.35 from 40 phones means|14 phones had the attribute|35 phones|0.35 phones|0|0.35 × 40 = 14. Relative frequency = count / n.",
+"Which summary is least affected by one extreme value?|Mean|Median|Standard deviation|1|The median depends only on the middle of the ordering.",
+"Log-transforming a strongly right-skewed variable usually|makes it more symmetric|removes all outliers|makes it categorical|0|Logs compress large values.",
+"Starting a bar plot’s y-axis at 95 instead of 0 mainly|clarifies differences honestly|exaggerates differences|changes the data|1|Bar length should be proportional to the value.",
+"Why look at plots before trusting summary numbers?|Different data sets can share the same mean, SD and r|Plots are required|Numbers are always wrong|0|Anscombe’s quartet has very different patterns behind identical summaries."];
+const X3=[
+"A sampling distribution describes|the spread of data in one sample|how a statistic varies across repeated samples|the shape of the population|1|It is the distribution of the statistic over all possible samples.",
+"Quadrupling n changes the standard error of the mean by a factor of|1/4|1/2|2|1|SE = σ/√n and √4 = 2, so it halves.",
+"The standard error differs from the SD of the data because it|measures the variability of an estimate, not of individuals|is always larger|ignores sample size|0|SD describes individuals; SE describes the statistic.",
+"An estimator is unbiased if|every estimate equals the parameter|its average over repeated samples equals the parameter|it has the smallest variance|1|There is no systematic error, though single estimates still vary.",
+"10,000 self-selected volunteers versus an SRS of 100. The large volunteer sample|guarantees accuracy|cannot fix selection bias|removes bias|1|Bias does not shrink with n; random selection protects against it.",
+"The CLT says that for large n the distribution of x̄ is approximately|the same as the population|normal, whatever the population shape|uniform|1|The mean’s distribution becomes normal; skewed populations need larger n.",
+"For a strongly skewed population and n = 5, the distribution of x̄ is|still noticeably skewed|exactly normal|identical to the population|0|n is too small for the CLT to have worked.",
+"For p̂ with p = 0.02 and n = 30, the normal approximation is|good|poor, because np is far below 10|irrelevant|1|Expected successes of 0.6 give a very skewed, discrete distribution.",
+"With σ unknown we use t rather than z because|s is a random estimate, which adds uncertainty|the data must be skewed|t has lighter tails|0|Heavier tails account for estimating σ.",
+"As df increases, the t distribution|becomes more skewed|approaches the standard normal|gets wider|1|With a large sample, s is close to σ.",
+"A 95% CI for a mean is (12, 18). The correct interpretation is|95% of the data lie between 12 and 18|the method captures the true mean in 95% of repeated samples|there is a 95% chance μ lies in this computed interval|1|The 95% describes the procedure; the fixed μ is either inside or not.",
+"With the same data, raising the confidence level from 95% to 99% makes the interval|narrower|wider|unchanged|1|More confidence needs a larger critical value.",
+"To halve the width of a CI for a mean, n must roughly be|doubled|quadrupled|halved|1|Width is proportional to 1/√n.",
+"A p-value of 0.03 means|the probability that H0 is true is 0.03|if H0 were true, data this extreme would occur about 3% of the time|the effect is large|1|It is a probability about the data assuming H0, not about H0.",
+"A study gets p = 0.20. The sound conclusion is|H0 is true|there is no convincing evidence against H0, which is not proof of no effect|the effect is exactly zero|1|A large p can simply reflect low power.",
+"A tiny p-value in a huge sample may reflect|an important effect always|a detectable but possibly trivial effect|a calculation mistake|1|Look at the CI and effect size, not only p.",
+"A Type I error is|failing to detect a real effect|rejecting a true null hypothesis|using the wrong test|1|It is a false alarm, with probability α.",
+"With n fixed, lowering α from 0.05 to 0.01 will|raise power|lower power (raise β)|leave β unchanged|1|A stricter rejection rule misses more real effects.",
+"Which change increases power?|A larger sample size|A larger σ|A smaller true effect|0|More data reduce the SE.",
+"A screening test flags people for follow-up. If missing a real case is far costlier than a false alarm, you should|choose a larger α (accept more false alarms)|choose a tiny α|ignore errors|0|Choose α from the relative costs of the two errors.",
+"A two-sided test at α = 0.05 gives p = 0.03. The 95% CI|contains the null value|excludes the null value|cannot be computed|1|Equivalence: reject exactly when the CI excludes the null value.",
+"A 90% CI for μ1 − μ2 is (−0.5, 3.1). A two-sided test of H0: μ1 = μ2 at α = 0.10|rejects H0|fails to reject H0|is impossible|1|Zero lies inside the interval.",
+"Why prefer Welch’s two-sample t-test?|It does not require equal population variances|It needs paired data|It is always more significant|0|We should not assume population variances are known or equal.",
+"The same 20 patients are measured before and after treatment. Which analysis fits?|Welch two-sample t on the two columns|One-sample t on the within-patient differences|Chi-square|1|Measurements are linked, so analyse the paired differences.",
+"Testing H0: p = 0.5 with p̂ = 0.56, from n = 25 or n = 2500. Which gives the smaller p-value?|n = 25|n = 2500|They are equal|1|Same difference, much smaller SE.",
+"A chi-square goodness-of-fit test asks whether|two means are equal|observed counts match a specified distribution|two variables are correlated|1|It compares observed with expected counts under the null distribution.",
+"Large (O − E)² / E contributions point to|cells where observed and expected counts differ greatly|the cells with the largest totals|the smallest cells always|0|They show where the discrepancy lives.",
+"One sample of students is classified by major and by year. To ask whether they are related, use|a test of independence|a test of homogeneity|a goodness-of-fit test|0|One sample, two categorical variables.",
+"Separate random samples of urban and rural residents are compared on opinion (agree, neutral, disagree). Which test?|Goodness of fit|Independence|Homogeneity|2|Samples come from different populations; same arithmetic, different design.",
+"A chi-square test rejects independence. This shows|one variable causes the other|the variables are associated|the association is strong|1|It shows association only; strength needs an effect size."];
+const X4=[
+"In y = 5 + 2x, the slope 2 means|y is 2 when x is 0|each one-unit rise in x goes with a 2-unit rise in predicted y|x causes y to double|1|The slope is the predicted change per unit of x, an association.",
+"The intercept is meaningful only if|x = 0 is within or near the range of the data|R² is high|the slope is positive|0|Otherwise it is an extrapolation.",
+"A regression of price on size gives R² = 0.64. This means|64% of the prices are correct|about 64% of the variation in price is explained by size|size causes 64% of price|1|R² is the proportion of variation explained.",
+"Adding any predictor to a model|never decreases R²|always raises adjusted R²|always improves prediction|0|R² cannot fall; adjusted R² penalises useless terms.",
+"Which residual plot suggests a straight-line model is inappropriate?|Random scatter around zero|A clear curve|A flat band|1|Curvature means missing structure.",
+"A funnel shape in the residuals vs fitted plot indicates|constant variance|variance that grows with the fitted value|a perfect fit|1|Non-constant variance; consider a transformation.",
+"Predicting y far outside the range of the x data is|interpolation|extrapolation, which is risky|regression to the mean|1|The linear pattern may not continue.",
+"In multiple regression the slope of x1 is interpreted|ignoring the other predictors|holding the other predictors fixed|as the correlation|1|It is the partial effect given the others in the model.",
+"Storage has slope +1.2 alone but +0.3 once battery life is added. Most likely|the data are wrong|storage and battery are correlated, so storage’s unique contribution is smaller|battery causes storage|1|Correlated predictors share explanatory power.",
+"Multicollinearity mainly harms|predictions within the data range, always|the stability and interpretation of individual slopes|the residual mean|1|SEs inflate and estimates swing, though predictions may stay fine.",
+"A VIF of 12 for a predictor means|it is highly predictable from the other predictors|it is the most important predictor|its p-value is 12|0|VIF = 1/(1 − R²) from regressing it on the others.",
+"Two predictors are nearly identical (r = 0.99). A reasonable response is|keep both and interpret each slope separately|drop one or combine them|increase α|1|They carry the same information.",
+"The overall F test in regression tests|each slope separately|whether at least one slope differs from zero|whether residuals are normal|1|H0: all slopes are zero.",
+"A slope has p = 0.40 in a multiple regression. This suggests|x is unrelated to y|no convincing evidence of a linear effect of x after accounting for the other predictors|R² = 0.40|1|The test is conditional on the other predictors.",
+"Two trending series give R² = 0.95. This proves|a causal link|nothing causal, since trending variables correlate easily|that the slope is zero|1|Spurious correlation from shared trends.",
+"A point with an extreme x value (high leverage) can|never affect the fitted line|pull the fitted line strongly toward itself|only change the intercept|1|Check influence by fitting with and without it.",
+"In simple regression r = 0.8. Then R² equals|0.8|0.64|0.9|1|R² = r² with one predictor.",
+"A residual is|a predicted value|observed minus fitted value|the error in the slope|1|Residual = y − ŷ.",
+"Least squares chooses the line that|minimises the sum of squared residuals|passes through the most points|has slope 1|0|It minimises SSE.",
+"One-way ANOVA tests|whether all group means are equal|whether variances are equal|whether two proportions differ|0|H0: μ1 = … = μk.",
+"In ANOVA, F is large when|variation between group means is large relative to variation within groups|group means are equal|n is small|0|F = MSB / MSW.",
+"ANOVA rejects H0. We may conclude|all means differ|at least one mean differs; follow-up comparisons say which|the factor causes the response in all groups|1|F is an omnibus test.",
+"Why not run all pairwise t-tests at α = 0.05 instead of ANOVA?|The overall false-positive risk grows beyond 5%|t-tests are invalid|ANOVA is always more powerful|0|Many tests inflate the familywise error.",
+"Ten independent tests at α = 0.05 with every null true. P(at least one false positive) is about|5%|40%|90%|1|1 − 0.95^10 ≈ 0.40.",
+"Bonferroni with m = 5 tests and overall α = 0.05 tests each at|0.05|0.01|0.25|1|It uses α/m.",
+"A downside of Bonferroni is|more false positives|lower power to detect real differences|it needs normality|1|Stricter thresholds miss more real effects.",
+"ANOVA assumes, approximately,|independent observations, roughly normal residuals and similar group spreads|equal sample sizes|known σ|0|We never assume σ is known; check the spread of each group.",
+"Three groups of 6 have means 76, 82, 78 and a within-group SD near 3. A large F arises because|group means differ by more than within-group noise|the SD is large|n is small|0|Between-group spread exceeds within-group spread.",
+"η² = SS between / SS total = 0.30 means|30% of the variation in the response is associated with group membership|30% of groups differ|p = 0.30|0|It is an effect size.",
+"A study tests 20 outcomes and reports the one with p = 0.04 as a discovery. The concern is|multiple testing: one small p among many is expected by chance|low power|bias in x̄|0|Report all tests and adjust."];
+const QS={1:[...Q.slice(0,26),...X1.map(pq)],2:[...Q.slice(26),...X2.map(pq)],3:X3.map(pq),4:X4.map(pq)};
+function rq(m){const A=QS[m];$("#qz").innerHTML=`<div class="c"><h2>Quizzes · 30 questions per module</h2><p>${[1,2,3,4].map(i=>`<button data-qm="${i}" ${i==m?'style="background:var(--ac);color:var(--bg)"':""}>Module ${i}</button>`).join(" ")}</p><p class="m">Concepts and interpretation, not formulas. Answer, then check.</p></div>`+A.map((z,i)=>`<div class="c"><p><b>${i+1}.</b> ${z[0]}</p>${z[1].map((o,j)=>`<label class="o"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("")}<p class="m" id="w${i}" hidden></p></div>`).join("")+`<p><button id="gr">Check answers</button> <b id="qs"></b></p>`;
+$$("[data-qm]").forEach(b=>b.onclick=()=>{rq(+b.dataset.qm);scrollTo(0,0)});
+$("#gr").onclick=()=>{let s=0;A.forEach((z,i)=>{const c=document.querySelector(`input[name=q${i}]:checked`),ok=c&&+c.value===z[2];if(ok)s++;const w=$("#w"+i);w.hidden=false;w.className=ok?"ok":"no";w.textContent=(ok?"Correct. ":"Not quite. ")+z[3]});$("#qs").textContent=`Score: ${s} / ${A.length}`}}
+rq(1);
+// ---- LaTeX and data viewers
+const tx=el=>{try{if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([el]).catch(()=>{})}catch(e){}};
+const R_=String.raw;
+Object.assign(TERMS,{
+count:["Multiplication rule",R_`If step 1 has $m$ ways and step 2 has $n$ ways, there are $m\times n$ ways in all. 2 brands $\times$ 2 origins = 4 cells in our table.`],
+perm:["Permutation",R_`Ordered selection of $k$ from $n$: $P(n,k)=\frac{n!}{(n-k)!}$. Ranking 3 of 200 phones gold/silver/bronze: $200\cdot199\cdot198=7{,}880{,}400$.`],
+comb:["Combination",R_`Unordered selection: $\binom{n}{k}=\frac{n!}{k!\,(n-k)!}=\frac{P(n,k)}{k!}$. A set of 5 phones to inspect: $\binom{200}{5}=2{,}535{,}650{,}040$.`],
+event:["Event",R_`Any subset of the sample space. $A\cup B$: A or B (or both); $A\cap B$: both; $A^c$: not A. $|I\cup V|=150+120-100=170$ phones.`],
+venn:["Venn diagram",R_`Circles are events, the overlap is the intersection. Count the overlap once: $|I\cup V|=150+120-100=170$.`],
+prob:["Probability",R_`With equally likely outcomes, $P(A)=\frac{\text{outcomes in }A}{\text{outcomes in }S}$. $P(I)=\frac{150}{200}=0.75$. Axioms: $P(A)\ge0$, $P(S)=1$, additive for disjoint events.`],
+cond:["Conditional probability",R_`$P(A\mid B)=\frac{P(A\cap B)}{P(B)}$: shrink the sample space to $B$. $P(I\mid V)=\frac{100}{120}=0.833$: among Vietnam phones, 83% are iPhones.`],
+indep:["Independence",R_`$A,B$ are independent if $P(A\cap B)=P(A)P(B)$, i.e. $P(A\mid B)=P(A)$. Here $0.5\ne0.75\times0.6=0.45$, so brand and origin are dependent.`],
+disj:["Disjoint events",R_`$A\cap B=\emptyset$, so $P(A\cap B)=0$. Disjoint events with positive probability are never independent: if one happens the other cannot.`],
+total:["Law of total probability",R_`If $B_1,\dots,B_k$ partition $S$: $P(A)=\sum_i P(A\mid B_i)P(B_i)$. Split phones by origin and add the weighted conditional probabilities.`],
+bayes:["Bayes formula",R_`$P(B\mid A)=\frac{P(A\mid B)P(B)}{P(A)}$, with $P(A)$ from total probability. It reverses a conditional: from $P(I\mid V)$ to $P(V\mid I)$.`],
+pmf:["pmf",R_`Probability mass function $p(k)=P(X=k)$ for discrete $X$. Values are $\ge0$ and $\sum_k p(k)=1$.`],
+pdf:["pdf",R_`Density $f(x)$ for continuous $X$: $P(a\le X\le b)=\int_a^b f(x)\,dx$. $P(X=x)=0$, and $f$ can exceed 1.`],
+cdf:["CDF",R_`$F(x)=P(X\le x)$. Non-decreasing from 0 to 1: a step function for discrete $X$, smooth for continuous $X$.`],
+mean:["Mean (expected value)",R_`$E(X)=\sum_x x\,p(x)$ or $\int x f(x)\,dx$, the long-run average. For the iPhone indicator, $E(X)=0.75$.`],
+variance:["Variance",R_`$\mathrm{Var}(X)=E[(X-\mu)^2]=E(X^2)-\mu^2$. Indicator: $p(1-p)=0.1875$. $\mathrm{Var}(aX+b)=a^2\,\mathrm{Var}(X)$.`],
+sd:["Standard deviation",R_`$\sigma=\sqrt{\mathrm{Var}(X)}$, in the units of $X$.`],
+cov:["Covariance",R_`$\mathrm{Cov}(X,Y)=E(XY)-E(X)E(Y)$. Positive: large together. $\mathrm{Var}(X+Y)=\mathrm{Var}X+\mathrm{Var}Y+2\,\mathrm{Cov}(X,Y)$.`],
+cor:["Correlation",R_`$\rho=\frac{\mathrm{Cov}(X,Y)}{\sigma_X\sigma_Y}$, between $-1$ and $1$, unit-free. Independent $\Rightarrow\rho=0$, but $\rho=0$ does not imply independence.`],
+joint:["Joint distribution",R_`$p(x,y)=P(X=x,Y=y)$. Marginals: sum the rows or the columns.`],
+unbiased:["Unbiased estimator",R_`Its average over all possible samples equals the parameter: $E(\bar x)=\mu$, $E(\hat p)=p$, $E(s^2)=\sigma^2$. Unbiased does not mean any single estimate is right, only that there is no systematic error.`],
+se:["Standard error",R_`The standard deviation of an estimator across repeated samples. For $\bar x$ it is $\sigma/\sqrt n$, estimated by $s/\sqrt n$ because $\sigma$ is unknown. For $\hat p$ it is $\sqrt{p(1-p)/n}$. Quadrupling $n$ halves it.`],
+clt:["Central Limit Theorem",R_`For large $n$, $\bar x$ is approximately normal with mean $\mu$ and SD $\sigma/\sqrt n$ whatever the population shape. Skewed populations need a larger $n$.`],
+tdist:["t distribution",R_`With $\sigma$ unknown, $\frac{\bar x-\mu}{s/\sqrt n}$ follows a $t$ distribution with $n-1$ df, not a normal, because $s$ changes from sample to sample. Tails are heavier; as df grows it approaches the standard normal.`],
+alpha:["Significance level α",R_`The Type I error rate you accept: $\alpha=P(\text{reject }H_0\mid H_0\text{ true})$. Choose it before seeing the data from the cost of a false alarm: smaller (0.01) when a false positive is costly, larger (0.10) when missing a real effect is costly. 0.05 is a convention, not a law.`],
+typeII:["Type II error",R_`Failing to reject a false $H_0$ (missed effect). Its probability is $\beta$, and power $=1-\beta$. $\beta$ shrinks with larger $n$, larger true effect, larger $\alpha$ and smaller $\sigma$.`],
+ci:["Confidence interval",R_`Estimate $\pm$ critical value $\times$ SE, e.g. $\bar x\pm t^*\frac{s}{\sqrt n}$. A 95% interval comes from a procedure that captures the true parameter in 95% of repeated samples. Once computed, this interval either contains the parameter or not; 95% describes the method, not this interval.`],
+citest:["CI and two-sided test",R_`A two-sided level-$\alpha$ test of $H_0:\theta=\theta_0$ rejects exactly when the $(1-\alpha)$ confidence interval excludes $\theta_0$. So the CI lists every null value that would not be rejected, and also shows the size of the effect.`],
+gof:["Chi-square goodness of fit",R_`One categorical variable. Compares observed counts with those expected under a stated distribution: $\chi^2=\sum\frac{(O-E)^2}{E}$, df = categories $-1$. Needs expected counts of about 5 or more.`],
+chiind:["Chi-square test of independence",R_`One sample, two categorical variables. $H_0$: independent, so $E=\frac{\text{row total}\times\text{column total}}{n}$ and df $=(r-1)(c-1)$.`],
+slope:["Slope",R_`In $y=b_0+b_1x$, $b_1$ is the predicted change in $y$ for a one-unit increase in $x$. With several predictors: for a one-unit increase in that $x$, holding the others fixed. It describes association, not causation.`],
+r2:["R²",R_`Share of the variation in $y$ explained by the model: $R^2=1-\frac{SSE}{SST}$. It never falls when predictors are added; adjusted $R^2$ penalises useless ones.`],
+multicol:["Multicollinearity",R_`Predictors strongly correlated with each other. Slopes become unstable with large SEs and may even change sign, although predictions can stay fine. $\mathrm{VIF}_j=\frac{1}{1-R_j^2}$, where $R_j^2$ comes from regressing $x_j$ on the other predictors; above 5 to 10 is a warning.`],
+anova:["One-way ANOVA",R_`Compares $k$ group means. $F=\frac{MSB}{MSW}$ with $k-1$ and $N-k$ df. $H_0:\mu_1=\dots=\mu_k$. A small p says at least one mean differs, not which.`],
+multtest:["Multiple testing",R_`With $m$ tests at level $\alpha$ the chance of at least one false positive is $1-(1-\alpha)^m$. Bonferroni tests each at $\alpha/m$ (or multiplies each p by $m$), holding the familywise error at $\alpha$ at the cost of power.`]});
+EX.m=s=>R_`Add all values: $\sum x_i=${f2(s.m*s.n)}$. Divide by $n=${s.n}$: $\bar x=\frac{${f2(s.m*s.n)}}{${s.n}}=${f2(s.m)}$. The mean is the balance point of the data.`;
+EX.v=s=>R_`Mean $\bar x=${f2(s.m)}$. First squared deviations: ${s.x.slice(0,3).map(v=>`(${f2(v)}−${f2(s.m)})² = ${f2((v-s.m)**2)}`).join("; ")}… Sum over all ${s.n} values: $${f2(s.ss)}$. Divide by $n-1=${s.n-1}$: $s^2=\frac{\sum(x_i-\bar x)^2}{n-1}=${f2(s.v)}$ (squared units).`;
+EX.sd=s=>R_`$s=\sqrt{${f2(s.v)}}=${f2(s.sd)}$, in the data’s own units: a typical distance from the mean.`;
+EX.sk=s=>R_`Average of $\left(\frac{x-\bar x}{s}\right)^3=${f2(s.sk)}$. Positive → right skew (mean ${f2(s.m)} vs median ${f2(s.med)}); negative → left skew; near 0 → roughly symmetric.`;
+EX.r=()=>R_`$r=\frac{\sum(x-\bar x)(y-\bar y)}{\sqrt{\sum(x-\bar x)^2\,\sum(y-\bar y)^2}}=\frac{${f2(SC.sxy)}}{\sqrt{${f2(SC.sxx)}\cdot${f2(SC.syy)}}}=${f4(SC.r)}$. The sign gives direction, the size gives linear strength. It does not prove causation.`;
+pop=function(t,h){$("#mt").textContent=t;$("#mb").innerHTML=h;$("#mo").hidden=false;tx($("#mb"))};
+(()=>{const rows=[["prob","P(I)",R_`\frac{150}{200}`,pI],["prob","P(V)",R_`\frac{120}{200}`,pV],["prob",R_`P(I\cap V)`,R_`\frac{100}{200}`,pIV],["event",R_`P(I\cup V)`,R_`P(I)+P(V)-P(I\cap V)`,pI+pV-pIV],["cond",R_`P(I\mid V)`,R_`\frac{P(I\cap V)}{P(V)}`,pIgV],["cond",R_`P(V\mid I)`,R_`\frac{P(I\cap V)}{P(I)}`,pVgI],["indep",R_`P(I)P(V)`,R_`\text{compare }P(I\cap V)=0.5`,pI*pV],["total","P(I)",R_`P(I\mid V)P(V)+P(I\mid V^c)P(V^c)`,pIgV*pV+pIgNV*.4],["bayes",R_`P(V\mid I)`,R_`\frac{P(I\mid V)P(V)}{P(I)}`,pIgV*pV/pI]];
+$$("#m1 .c")[2].querySelector("table").innerHTML=`<tr><th>Quantity</th><th>Formula</th><th>Value</th></tr>`+rows.map(([k,a,b,v])=>`<tr><td><a class="t" data-k="${k}">$${a}$</a></td><td>$${b}$</td><td>${f4(v)}</td></tr>`).join("");
+const ps=$$("#m1 .c")[5].querySelectorAll("p");
+ps[1].innerHTML=R_`$E(X)=0.75$, $E(Y)=0.6$, $E(XY)=0.5$. <a class="t" data-k="cov">Covariance</a> $=0.5-0.75\times0.6=${f4(cv)}$. $\mathrm{Var}(X)=${f4(vX)}$, $\mathrm{Var}(Y)=${f4(vY)}$, so the <a class="t" data-k="cor">correlation</a> is $\rho=\frac{${f4(cv)}}{\sqrt{${f4(vX)}\cdot${f4(vY)}}}=${f4(cv/Math.sqrt(vX*vY))}$: weakly positive.`;
+ps[2].innerHTML=R_`Properties: $E(aX+b)=aE(X)+b$; $\mathrm{Var}(aX+b)=a^2\,\mathrm{Var}(X)$; $E(X+Y)=E(X)+E(Y)=1.35$; $\mathrm{Var}(X+Y)=\mathrm{Var}X+\mathrm{Var}Y+2\,\mathrm{Cov}=${f4(vX)}+${f4(vY)}+${f4(2*cv)}=${f4(vX+vY+2*cv)}$. Direct check from the pmf of $X+Y$: $${f4(vS)}$. If $X$ and $Y$ were independent, the covariance term would vanish.`})();
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function dtab(el,c,name){const ks=Object.keys(c),n=c[ks[0]].raw.length;el.innerHTML=`<details class="dt"><summary>View data: ${esc(name)} (${n} rows, ${ks.length} columns)</summary><p><input type="text" placeholder="Search rows"></p><div class="w" style="max-height:240px;overflow:auto"><table><tr>${ks.map(k=>`<th>${esc(k)}</th>`).join("")}</tr><tbody></tbody></table></div><p class="m"></p></details>`;
+const inp=el.querySelector("input"),tb=el.querySelector("tbody"),m=el.querySelector("p.m");
+const go=()=>{const t=inp.value.toLowerCase();let k=0,h="";for(let i=0;i<n;i++){const r=ks.map(a=>c[a].raw[i]);if(!t||r.join(" ").toLowerCase().includes(t)){if(k<300)h+=`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`;k++}}tb.innerHTML=h;m.textContent=`${k} of ${n} rows match${k>300?" (first 300 shown)":""}`};inp.oninput=go;go()}
+const bt={id:{raw:[]},type:{raw:[]},origin:{raw:[]}};[[100,"iPhone","Vietnam"],[50,"iPhone","Elsewhere"],[20,"Other","Vietnam"],[30,"Other","Elsewhere"]].forEach(([n,a,b])=>{for(let i=0;i<n;i++){bt.id.raw.push(bt.id.raw.length+1);bt.type.raw.push(a);bt.origin.raw.push(b)}});
+const bd=document.createElement("div");bd.className="tex2jax_ignore";$$("#m1 .c")[0].appendChild(bd);dtab(bd,bt,"the batch of 200 phones");
+const _ld=load;load=function(k){_ld(k);dtab($("#zdt2"),DB[k],k=="up"?"uploaded file":k)};dtab($("#zdt2"),DB[$("#ds").value],$("#ds").value);
+function showD(){dtab($("#zdr"),DB[$("#zrd").value],$("#zrd").value);dtab($("#zda"),DB[$("#zad").value],$("#zad").value)}
+$("#zrd").addEventListener("change",showD);$("#zad").addEventListener("change",showD);
+$$("nav button").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.t=="m4")showD()}));showD();
+</script></body></html>
