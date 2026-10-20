@@ -22,9 +22,9 @@ nav{flex-wrap:wrap}nav button{flex:1;padding:5px 4px;font-size:.85rem}nav .on{ba
 .o{display:block;padding:4px 0}.ok{color:var(--ok)}.no{color:var(--bad)}
 .f{fill:var(--ac);opacity:.8}.l{fill:none;stroke:var(--ac);stroke-width:2}.k{fill:none;stroke:var(--ac);stroke-width:2}.b{fill:var(--bad)}
 svg text{fill:currentColor}.w{overflow-x:auto}ul.tr{margin:.3em 0;padding-left:1.2em}
-.dt th{position:sticky;top:0;background:var(--card)}.dt table{font-size:.85rem}</style><script>window.MathJax={tex:{inlineMath:[["$","$"]]},svg:{fontCache:"global"}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script></head><body>
-<header><h1>Statistics For Engineers</h1><p class="m">Modules 1–2 · tap any underlined term (such as <a class="t" data-k="experiment">this</a>) or number for a popup example.</p></header>
-<nav><button data-t="m1" class="on">1 Probability</button><button data-t="m2">2 Descriptive</button><button data-t="m3">3 Inference</button><button data-t="m4">4 Regression &amp; ANOVA</button><button data-t="qz">Quizzes</button></nav>
+.dt th{position:sticky;top:0;background:var(--card)}.dt table{font-size:.85rem}pre{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px;overflow:auto;font-size:.8rem;margin:.4em 0}code{font-size:.9em}a.g{color:var(--ac);border-bottom:1px dotted;cursor:pointer}</style><script>window.MathJax={tex:{inlineMath:[["$","$"]]},svg:{fontCache:"global"}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script></head><body>
+<header><h1>Statistics for Engineers</h1><p class="m">Modules 1–2 · tap any underlined term (such as<a class="t" data-k="experiment">this</a>) or number for a popup example.</p></header>
+<nav><button data-t="m1" class="on">1 Probability</button><button data-t="m2">2 Descriptive</button><button data-t="m3">3 Inference</button><button data-t="m4">4 Regression &amp; ANOVA</button><button data-t="qz">Quizzes</button><button data-t="ap">R Appendix</button></nav>
 <main><section id="m1"></section>
 <section id="m2" hidden>
 <div class="c"><h2>2.1 Choose data</h2><select id="ds"><option value="phones">Phones</option><option value="exam">Study hours &amp; exam scores</option><option value="comm">Commutes</option></select> or upload a CSV <input id="up" type="file" accept=".csv,text/csv"><p>Variable: <select id="v"></select></p><p class="m" id="di"></p><div id="zdt2" class="tex2jax_ignore"></div></div>
@@ -32,7 +32,7 @@ svg text{fill:currentColor}.w{overflow-x:auto}ul.tr{margin:.3em 0;padding-left:1
 <div class="c"><h2>2.3 Distribution plots</h2><p>Bins: <input id="bn" type="range" min="3" max="20" value="6"></p><div id="pl"></div></div>
 <div class="c"><h2>2.4 Scatter plot</h2><p>x <select id="sx"></select> y <select id="sy"></select></p><div id="sc"></div></div>
 </section>
-<section id="m3" hidden></section><section id="m4" hidden></section><section id="qz" hidden></section></main>
+<section id="m3" hidden></section><section id="m4" hidden></section><section id="ap" hidden></section><section id="qz" hidden></section></main>
 <div id="mo" hidden><div class="box"><h3 id="mt" style="margin:0 0 6px"></h3><div id="mb"></div><p><button id="x">Close</button></p></div></div>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -160,7 +160,7 @@ load("phones");
 // ---- popups & tabs
 function pop(t,h){$("#mt").textContent=t;$("#mb").innerHTML=h;$("#mo").hidden=false}
 document.addEventListener("click",e=>{const a=e.target.closest("a.t");if(a){if(a.dataset.k){const[t,h]=TERMS[a.dataset.k];pop(t,h)}else pop("Example: "+a.dataset.l,EX[a.dataset.e](a.dataset.e==="p"?st.n:st))}if(e.target.id==="x"||e.target.id==="mo")$("#mo").hidden=true});
-$$("nav button").forEach(b=>b.onclick=()=>{$$("nav button").forEach(z=>z.classList.toggle("on",z===b));["m1","m2","m3","m4","qz"].forEach(i=>$("#"+i).hidden=i!==b.dataset.t);scrollTo(0,0)});
+$$("nav button").forEach(b=>b.onclick=()=>{$$("nav button").forEach(z=>z.classList.toggle("on",z===b));["m1","m2","m3","m4","ap","qz"].forEach(i=>$("#"+i).hidden=i!==b.dataset.t);scrollTo(0,0)});
 // ---- Quiz
 const Q=[
 ["Experiment: draw one phone from the batch. What is the sample space?",["The 200 phones (all possible outcomes)","Only the 150 iPhones","The number 0.75"],0,"The sample space lists every possible outcome, not a probability or a single event."],
@@ -255,7 +255,7 @@ $("#ztp").innerHTML=frame(-4,4,0,.42,(sx,sy)=>`<polyline class="k" style="stroke
 $("#zdf").oninput=tpl;
 const ID={"1m":{a:"20,22,24,26,18,23",b:"",h:20,la:"Sample values (iPhone battery hours)",lb:"",hl:"H0: μ ="},"2m":{a:"20,22,24,26,18,23",b:"19,21,24,16,20,22,18,17,19,15,21,15",h:0,la:"Group 1 values (iPhone battery hours)",lb:"Group 2 values (other phones)",hl:"H0: μ1−μ2 ="},"1p":{a:"45,60",b:"",h:.5,la:"successes, n (e.g. 45 of 60 prefer product A)",lb:"",hl:"H0: p ="},"2p":{a:"100,120",b:"50,80",h:0,la:"Group 1: iPhones, batch size (Vietnam-made)",lb:"Group 2: iPhones, batch size (made elsewhere)",hl:"H0: p1−p2 = 0"}};
 function imode(){const d=ID[$("#zim").value];$("#zia").value=d.a;$("#zib").value=d.b;$("#zi0").value=d.h;$("#zla").textContent=d.la;$("#zlb").textContent=d.lb;$("#zhl").textContent=d.hl;$("#zi0").hidden=$("#zim").value=="2p";$("#zib").hidden=!d.b&&$("#zim").value[1]=="m"&&$("#zim").value=="1m"||$("#zim").value=="1p";$("#zlb").hidden=$("#zib").hidden;inf()}
-function inf(){const m=$("#zim").value,cf=+$("#zic").value,al=1-cf,h=m=="2p"?0:+$("#zi0").value,A=num($("#zia").value),Bv=num($("#zib").value);let est,se,stat,df="–",p,lo,hi,sn,nm,ok=1;
+function inf(){const m0=$("#zim").value,pd=m0=="pd",m=pd?"1m":m0,cf=+$("#zic").value,al=1-cf,h=m=="2p"?0:+$("#zi0").value,Bv=num($("#zib").value),A=pd?num($("#zia").value).map((v,i)=>v-Bv[i]):num($("#zia").value);let est,se,stat,df="–",p,lo,hi,sn,nm,ok=1;
 try{if(m=="1m"){if(A.length<2)throw 0;se=sdv(A)/Math.sqrt(A.length);est=mean(A);df=A.length-1;stat=(est-h)/se;p=pt2(stat,df);const c=tcrit(cf,df);lo=est-c*se;hi=est+c*se;sn="t";nm="μ"}
 else if(m=="2m"){if(A.length<2||Bv.length<2)throw 0;const w=welch(A,Bv);est=w.d;se=w.se;df=w.df;stat=(est-h)/se;p=pt2(stat,df);const c=tcrit(cf,df);lo=est-c*se;hi=est+c*se;sn="t";nm="μ1−μ2"}
 else if(m=="1p"){const[x,n]=A;est=x/n;se=Math.sqrt(est*(1-est)/n);stat=(est-h)/Math.sqrt(h*(1-h)/n);p=2*(1-pn(Math.abs(stat)));const c=zcrit(cf);lo=est-c*se;hi=est+c*se;sn="z";nm="p"}
@@ -474,4 +474,85 @@ const _ld=load;load=function(k){_ld(k);dtab($("#zdt2"),DB[k],k=="up"?"uploaded f
 function showD(){dtab($("#zdr"),DB[$("#zrd").value],$("#zrd").value);dtab($("#zda"),DB[$("#zad").value],$("#zad").value)}
 $("#zrd").addEventListener("change",showD);$("#zad").addEventListener("change",showD);
 $$("nav button").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.t=="m4")showD()}));showD();
+// ---- Scope additions: z-scores, concept cards, R appendix
+const RC={plot:`x <- c(20, 22, 24, 26, 18, 23)       # a numeric variable
+summary(x); sd(x); var(x); IQR(x)    # numerical summaries
+hist(x, breaks = 6)                  # histogram
+boxplot(x, horizontal = TRUE)        # boxplot
+barplot(table(phones$brand))         # bar plot of a categorical variable
+plot(phones$storage, phones$price)   # scatter plot
+cor(phones$storage, phones$price)    # correlation`,
+norm:`z <- (78 - 70) / 5               # z-score
+pnorm(z)                             # P(Z <= z) = P(X <= 78)
+1 - pnorm(z)                         # upper tail
+2 * (1 - pnorm(abs(z)))              # two-sided tail probability
+pnorm(78, mean = 70, sd = 5)         # same, without standardising
+qnorm(0.975)                         # z* for a 95% interval (1.96)
+qt(0.975, df = 9)                    # t* for a 95% interval, 9 df
+2 * (1 - pt(2.1, df = 9))            # two-sided p-value for t = 2.1`,
+sim:`means <- replicate(2000, mean(rnorm(10, mean = 50, sd = 10)))
+hist(means); mean(means); sd(means)  # compare sd with 10 / sqrt(10)
+phat <- replicate(2000, mean(rbinom(20, 1, 0.3)))
+hist(phat); mean(phat); sd(phat)`,
+ci:`x <- c(20, 22, 24, 26, 18, 23)
+t.test(x, mu = 20, conf.level = 0.95)      # one-sample t: t, df, p-value, CI
+t.test(a, b)                                # Welch two-sample t (the default)
+t.test(before, after, paired = TRUE)        # paired t
+prop.test(45, 60, p = 0.5, correct = FALSE)             # one proportion
+prop.test(c(100, 50), c(120, 80), correct = FALSE)      # two proportions`,
+chi:`chisq.test(c(18, 22, 16, 25, 19, 20))                  # goodness of fit, equal probabilities
+chisq.test(c(30, 40, 30), p = c(.3, .4, .3))             # specified probabilities
+tab <- matrix(c(100, 20, 50, 30), nrow = 2)              # counts: rows iPhone/other, columns Vietnam/elsewhere
+chisq.test(tab, correct = FALSE)                         # independence or homogeneity
+chisq.test(tab)$expected                                 # expected counts`,
+reg:`fit <- lm(price ~ storage + battery, data = phones)
+summary(fit)               # slopes, SE, t, p, R-squared, adjusted R-squared, F
+confint(fit)               # confidence intervals for slopes
+plot(fit, which = 1)       # residuals vs fitted
+library(car); vif(fit)     # multicollinearity (variance inflation factors)`,
+anova:`fit <- aov(score ~ method, data = methods)
+summary(fit)                                     # one-way ANOVA F test
+pairwise.t.test(methods$score, methods$method,
+                p.adjust.method = "bonferroni", pool.sd = FALSE)
+TukeyHSD(fit)                                    # Tukey comparisons`};
+const RT={plot:["R: plots and summaries",RC.plot],norm:["R: normal and t probabilities, z-scores",RC.norm],sim:["R: simulating sampling distributions",RC.sim],ci:["R: confidence intervals and p-values",RC.ci],chi:["R: chi-square tests",RC.chi],reg:["R: regression",RC.reg],anova:["R: ANOVA and multiple comparisons",RC.anova]};
+Object.entries(RT).forEach(([k,[t,c]])=>{TERMS["r_"+k]=[t,`<pre>${esc(c)}</pre><p class="m">Load your data first, e.g. <code>phones &lt;- read.csv("phones.csv")</code>. <a class="g" data-go="ap">Open the full appendix</a></p>`]});
+$("#ap").innerHTML=`<div class="c"><h2>Appendix: R code</h2><p>Short R snippets that reproduce what the app does. Replace the example data with your own. R’s defaults differ slightly from the app in places: <code>prop.test</code> and <code>chisq.test</code> apply a continuity correction unless <code>correct = FALSE</code>, and <code>prop.test</code> gives a Wilson-type interval rather than the simple z interval used here.</p></div>`+Object.entries(RT).map(([k,[t,c]])=>`<div class="c"><h3>${t}</h3><pre>${esc(c)}</pre></div>`).join("");
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g){$("#mo").hidden=true;document.querySelector(`nav button[data-t="${g.dataset.go}"]`).click()}});
+TERMS.zscore=["z-score",R_`$z=\frac{x-\mu}{\sigma}$ (or $\frac{x-\bar x}{s}$ for data) counts how many standard deviations $x$ lies from the mean. $z=-1.5$ means 1.5 SDs below. See section 1.6.`];
+TERMS.stdnorm=["Standard normal distribution",R_`$Z\sim N(0,1)$: mean 0, SD 1. If $X\sim N(\mu,\sigma^2)$ then $Z=\frac{X-\mu}{\sigma}\sim N(0,1)$, so every normal probability reduces to $\Phi(z)=P(Z\le z)$. Critical values $z^*=1.645,\ 1.960,\ 2.576$ serve 90%, 95%, 99% intervals.`];
+const rl=(sel,i,key,txt)=>{const p=document.createElement("p");p.className="m";p.innerHTML=`R code: <a class="t" data-k="r_${key}">${txt}</a> · <a class="g" data-go="ap">Appendix</a>`;$$(sel)[i].appendChild(p)};
+// Module 1: distribution facts and the z-score card
+DS.Binomial.t="Number of successes in n independent trials with the same p. Sampling without replacement from a small batch is only approximately binomial.";
+DS.Poisson.t="Count of events in a fixed interval at rate λ. Mean = variance = λ.";
+DS.Exponential.t="Waiting time at rate λ, mean 1/λ. Memoryless: having waited already tells nothing about the remaining wait, P(X > s+t given X > s) = P(X > t).";
+DS.Normal.t="Symmetric bell curve. About 68%, 95%, 99.7% of values lie within 1, 2, 3 SDs of the mean (see 1.6 for z-scores).";
+setP();
+const zc0=document.createElement("div");zc0.className="c";
+zc0.innerHTML=T(R_`<h2>1.6 Z-scores and the standard normal distribution</h2><p>A [zscore|z-score] $z=\frac{x-\mu}{\sigma}$ measures how many standard deviations a value lies from the mean. Standardising any normal variable gives the [stdnorm|standard normal] $Z\sim N(0,1)$, so one function, $\Phi(z)=P(Z\le z)$, answers every normal question. We need this later: confidence intervals use critical values $z^*$, and tests compare a standardised statistic with the standard normal (or $t$).</p><p>μ <input id="zzm" type="number" value="70"> σ <input id="zzs" type="number" value="5" min="0.1" step="any"> x <input id="zzx" type="number" value="78"></p><div id="zzo"></div><p>Empirical rule: $P(|Z|\lt1)=${f4(pn(1)-pn(-1))}$, $P(|Z|\lt2)=${f4(pn(2)-pn(-2))}$, $P(|Z|\lt3)=${f4(pn(3)-pn(-3))}$. Critical values: $z^*=${f4(zcrit(.9))}$ (90%), $${f4(zcrit(.95))}$ (95%), $${f4(zcrit(.99))}$ (99%).</p>`);
+$("#m1").insertBefore(zc0,$$("#m1 .c")[5]);$$("#m1 .c")[6].querySelector("h2").textContent="1.7 Joint distribution, covariance, correlation";
+function zq(){const mu=+$("#zzm").value,sg=+$("#zzs").value,x=+$("#zzx").value,z=(x-mu)/sg,zl=Math.max(-4,Math.min(4,z)),N=t=>Math.exp(-t*t/2)/Math.sqrt(2*Math.PI),xs=Array.from({length:161},(_,i)=>-4+i*.05),sh=xs.filter(t=>t<=zl);
+if(!isFinite(z)){$("#zzo").innerHTML="<p class=no>Enter a positive σ.</p>";return}
+$("#zzo").innerHTML=frame(-4,4,0,.42,(sx,sy)=>`<polygon points="${sx(-4)},${sy(0)} ${sh.map(t=>sx(t)+","+sy(N(t))).join(" ")} ${sx(zl)},${sy(N(zl))} ${sx(zl)},${sy(0)}" style="fill:var(--ac);opacity:.4"/><polyline class="l" points="${xs.map(t=>sx(t)+","+sy(N(t))).join(" ")}"/><line x1="${sx(zl)}" x2="${sx(zl)}" y1="${sy(0)}" y2="${sy(N(zl))}" stroke="currentColor"/>`,4)+R_`<p>$z=\frac{${x}-${mu}}{${sg}}=${f2(z)}$. $P(X\le ${x})=\Phi(${f2(z)})=${f4(pn(z))}$; upper tail $P(X\gt ${x})=${f4(1-pn(z))}$; two-sided tail $P(|Z|\ge ${f2(Math.abs(z))})=${f4(2*(1-pn(Math.abs(z))))}$.</p>`;tx($("#zzo"))}
+["zzm","zzs","zzx"].forEach(i=>$("#"+i).oninput=zq);zq();
+// Module 2: concepts card
+const c25=document.createElement("div");c25.className="c";
+c25.innerHTML=T(R_`<h2>2.5 Concepts behind the tools</h2><ul><li><b>Variable types.</b> Categorical: nominal (brand) or ordinal (Low, Medium, High). Numeric: discrete (counts) or continuous (measurements). Codes such as zip codes are labels, not numbers to average. Bar plots are for categories, histograms for numbers.</li><li><b>Shift and scale.</b> Adding $c$ to every value shifts the mean and median by $c$ and leaves the SD and IQR unchanged; multiplying by $c$ multiplies the mean and SD by $|c|$ (the variance by $c^2$). Correlation does not depend on units.</li><li><b>Position.</b> $Q_1$ is about the 25th percentile. A [zscore|z-score] $z=\frac{x-\bar x}{s}$ counts SDs from the mean; for bell-shaped data about 68%, 95%, 99.7% lie within 1, 2, 3 SDs (section 1.6).</li><li><b>Robustness.</b> The mean, SD and $r$ are pulled by outliers; the median and IQR resist. A log transform pulls in a long right tail.</li><li><b>Why divide by $n-1$.</b> Deviations from $\bar x$ (estimated from the same data) are slightly too small, so dividing by $n-1$ makes $s^2$ unbiased for $\sigma^2$.</li><li><b>Pitfalls.</b> Selection bias (a bigger sample does not fix it); bar plots with a truncated axis exaggerate differences; a lurking variable can reverse a trend when groups are pooled (Simpson’s paradox); correlation is not causation; identical summaries can hide very different shapes (Anscombe’s quartet), so always plot.</li></ul><p>Outlier demo: data <input type="text" id="zod" value="3,4,5,6,7"> <button id="zob">Add outlier 102</button></p><div id="zoo"></div>`);
+$("#m2").appendChild(c25);
+$("#zob").onclick=()=>{const a=num($("#zod").value),b=[...a,102],f=x=>`mean ${f2(mean(x))}, median ${f2(q([...x].sort((u,v)=>u-v),.5))}, SD ${f2(sdv(x))}`;$("#zoo").innerHTML=`<p>Before: ${f(a)}<br>After adding 102: ${f(b)}<br>The mean and SD jump; the median barely moves.</p>`};
+// Module 3: paired mode and key-ideas card
+ID.pd={a:"20,22,24,26,18,23",b:"21,24,25,29,19,26",h:0,la:"Before (one value per unit)",lb:"After (same units, same order)",hl:"H0: mean difference ="};
+$("#zim").add(new Option("Paired means (t on differences)","pd"),$("#zim").options[2]);
+const c36=document.createElement("div");c36.className="c";
+c36.innerHTML=T(R_`<h2>3.6 Key ideas behind the tools</h2><ul><li><b>Paired data.</b> When the same units are measured twice (before and after), analyse the within-unit differences with a one-sample $t$ procedure: choose “Paired means” in 3.3.</li><li><b>CI width.</b> Width is proportional to $\frac{1}{\sqrt n}$ and grows with the confidence level (larger critical value). Halving the width takes four times the data.</li><li><b>Statistical vs practical significance.</b> With a huge sample a trivial effect can give a tiny [pval|p-value]; with a small sample a large effect can give a large one. Read the CI and the effect size, and remember that a large $p$ is not proof of no effect (power may be low).</li><li><b>Association vs causation.</b> A rejected chi-square test shows association, not causation. Strength needs an effect size such as Cramér’s $V=\sqrt{\frac{\chi^2}{n\,\min(r-1,\,c-1)}}$, and causal claims need a randomised experiment.</li><li><b>Bias is not cured by $n$.</b> A larger sample shrinks the [se|standard error] but not the bias of a non-random sample ([srs|SRS]).</li></ul>`);
+$("#m3").appendChild(c36);
+// Module 4: key-ideas card
+const c43=document.createElement("div");c43.className="c";
+c43.innerHTML=T(R_`<h2>4.3 Key ideas and cautions</h2><ul><li><b>Least squares.</b> The fitted line minimises $\sum e_i^2$, where the residual is $e_i=y_i-\hat y_i$ (observed minus fitted). In simple regression $R^2=r^2$.</li><li><b>Intercept and extrapolation.</b> The intercept is the predicted $y$ at $x=0$, meaningful only if $x=0$ is plausible. Predicting far outside the range of the data (extrapolation) is risky.</li><li><b>Residual plots.</b> A random band around zero is good; a curve means a missing nonlinear term; a funnel means the variance changes with the fitted value.</li><li><b>Leverage and influence.</b> Points with extreme $x$ (or a large residual) can pull the line toward themselves; refit without them to check.</li><li><b>Spurious correlation.</b> Two trending series often give a high $R^2$ with no causal link.</li><li><b>Slope tests are conditional.</b> The p-value of a slope asks whether $x$ adds to the model given the other predictors; the overall $F$ test asks whether at least one slope is nonzero.</li><li><b>ANOVA assumptions.</b> Independent observations, roughly normal residuals, similar group spreads. $F$ is an omnibus test: it says some mean differs, not which. $\eta^2=\frac{SSB}{SST}$ is the effect size.</li><li><b>Many outcomes.</b> Testing 20 outcomes and reporting the smallest p inflates false positives; report all tests and adjust (see multiple testing).</li></ul>`);
+$("#m4").appendChild(c43);
+// R reminders in the relevant cards
+rl("#m1 .c",5,"norm","pnorm, qnorm, z-scores");
+rl("#m2 .c",1,"plot","summary, sd, IQR");rl("#m2 .c",2,"plot","hist, boxplot, barplot");rl("#m2 .c",3,"plot","plot, cor");
+rl("#m3 .c",0,"sim","simulate sampling distributions");rl("#m3 .c",1,"norm","qt, pt");rl("#m3 .c",2,"ci","t.test, prop.test");rl("#m3 .c",4,"chi","chisq.test");
+rl("#m4 .c",0,"reg","lm, summary, vif");rl("#m4 .c",1,"anova","aov, pairwise.t.test");
 </script></body></html>
