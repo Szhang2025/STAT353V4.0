@@ -23,7 +23,7 @@ nav{flex-wrap:wrap}nav button{flex:1;padding:5px 4px;font-size:.85rem}nav .on{ba
 .f{fill:var(--ac);opacity:.8}.l{fill:none;stroke:var(--ac);stroke-width:2}.k{fill:none;stroke:var(--ac);stroke-width:2}.b{fill:var(--bad)}
 svg text{fill:currentColor}.w{overflow-x:auto}ul.tr{margin:.3em 0;padding-left:1.2em}
 .dt th{position:sticky;top:0;background:var(--card)}.dt table{font-size:.85rem}pre{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px;overflow:auto;font-size:.8rem;margin:.4em 0}code{font-size:.9em}:root{--bl:#2f6fdd}@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bl:#6aa7ff}}:root[data-theme="dark"]{--bl:#6aa7ff}a.g{color:var(--ac);border-bottom:1px dotted;cursor:pointer}</style><script>window.MathJax={tex:{inlineMath:[["$","$"]]},svg:{fontCache:"global"}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script></head><body>
-<header><h1>Statistics for Engineers</h1><p class="m">Modules 1–4 · quizzes · R appendix · tap any underlined term (such as <a class="t" data-k="experiment">this</a>) or number for a popup example.</p></header>
+<header><h1>Statistics Lab</h1><p class="m">Modules 1–4 · quizzes · R appendix · tap any underlined term (such as <a class="t" data-k="experiment">this</a>) or number for a popup example.</p></header>
 <nav><button data-t="m1" class="on">1 Probability</button><button data-t="m2">2 Descriptive</button><button data-t="m3">3 Inference</button><button data-t="m4">4 Regression &amp; ANOVA</button><button data-t="qz">Quizzes</button><button data-t="ap">R Appendix</button></nav>
 <main><section id="m1"></section>
 <section id="m2" hidden>
@@ -555,4 +555,28 @@ rl("#m1 .c",5,"norm","pnorm, qnorm, z-scores");
 rl("#m2 .c",1,"plot","summary, sd, IQR");rl("#m2 .c",2,"plot","hist, boxplot, barplot");rl("#m2 .c",3,"plot","plot, cor");
 rl("#m3 .c",0,"sim","simulate sampling distributions");rl("#m3 .c",1,"norm","qt, pt");rl("#m3 .c",2,"ci","t.test, prop.test");rl("#m3 .c",4,"chi","chisq.test");
 rl("#m4 .c",0,"reg","lm, summary, vif");rl("#m4 .c",1,"anova","aov, pairwise.t.test");
+// ---- Auto-convert remaining math symbols to LaTeX
+const GK={"α":R_`\alpha`,"β":R_`\beta`,"γ":R_`\gamma`,"δ":R_`\delta`,"ε":R_`\varepsilon`,"η":R_`\eta`,"θ":R_`\theta`,"λ":R_`\lambda`,"μ":R_`\mu`,"π":R_`\pi`,"ρ":R_`\rho`,"σ":R_`\sigma`,"τ":R_`\tau`,"φ":R_`\varphi`,"χ":R_`\chi`,"ω":R_`\omega`,"Σ":R_`\Sigma`,"Φ":R_`\Phi`,"Δ":R_`\Delta`,"±":R_`\pm`,"×":R_`\times`,"·":R_`\cdot`,"≤":R_`\le`,"≥":R_`\ge`,"≠":R_`\ne`,"≈":R_`\approx`,"∩":R_`\cap`,"∪":R_`\cup`,"∑":R_`\sum`,"→":R_`\to`,"⇒":R_`\Rightarrow`,"⇔":R_`\Leftrightarrow`,"∞":R_`\infty`,"∅":R_`\emptyset`,"∈":R_`\in`,"−":"-","²":"^2","³":"^3","₀":"_0","₁":"_1","₂":"_2","ᶜ":"^c"};
+Object.keys(GK).forEach(k=>{if(/^\\[a-z]/i.test(GK[k]))GK[k]+=" "});
+const SYMR=/[\u0391-\u03a9\u03b1-\u03c9\u00b1\u00d7\u2264\u2265\u2260\u2248\u2229\u222a\u2211\u221a\u2192\u21d2\u21d4\u221e\u2205\u2208\u00b2\u00b3\u2080-\u2089\u1d9c\u0302\u0304\u0177\u2212]/;
+const FN=new Set(["Var","Cov","Corr","VIF","SSE","SST","SSB","MSB","MSW","SD","SE","df","min","max","exp","log"]);
+const OPS=new Set(["\u00b1","\u00d7","\u2264","\u2265","\u2260","\u2248","\u2229","\u222a","\u2212"]),WK=new Set(["=","+","<",">","/"]),VR=/^[nkprstxyzmXYZ]$/,FS=/^\(?[A-Z][A-Za-z]{0,3}\(/;
+function mj(m){m=m.replace(/([\u03b1-\u03c9])([0-9])/g,"$1_$2").replace(/[A-Za-z]{2,}(?: [A-Za-z]{2,})*/g,w=>FN.has(w)?R_`\mathrm{`+w+"}":R_`\text{`+w+"}");
+m=m.replace(/([A-Za-z])\u0304/g,(a,c)=>R_`\bar{`+c+"}").replace(/([A-Za-z])\u0302/g,(a,c)=>R_`\hat{`+c+"}").replace(/\u0177/g,R_`\hat{y}`);
+let o="",i;while((i=m.indexOf("\u221a"))>=0){o+=m.slice(0,i);m=m.slice(i+1);if(m[0]=="("){let d=0,j=0;for(;j<m.length;j++){if(m[j]=="(")d++;else if(m[j]==")"&&--d==0)break}o+=R_`\sqrt{`+m.slice(1,j)+"}";m=m.slice(j+1)}else{const g=m.match(/^(\\[a-z]+\{[^}]*\}|[A-Za-z0-9]+)/),t=g?g[0]:"";o+=R_`\sqrt{`+t+"}";m=m.slice(t.length)}}
+return (o+m).replace(/[^\x00-\x7f]/g,c=>GK[c]||c).replace(/%/g,R_`\%`).replace(/([A-Za-z])\*/g,"$1^*").replace(/\|/g,R_` \mid `).replace(/\^(\d{2,})/g,"^{$1}")}
+function cvp(p){if(!/[^\x00-\x7f]|\b[nkprstxyzmXYZ]\b|\b[A-Z][A-Za-z]{0,3}\(/.test(p))return p;
+const tk=p.split(" "),n=tk.length,core=tk.map(t=>t.replace(/[,.;:?!]+$/,"")),suf=tk.map((t,i)=>t.slice(core[i].length)),run=Array(n).fill(false);let d=0;
+core.forEach((c,i)=>{if(d>0||FS.test(c)){run[i]=true;d=Math.max(0,d+(c.match(/\(/g)||[]).length-(c.match(/\)/g)||[]).length)}else if(SYMR.test(c)||VR.test(c))run[i]=true});
+const term=c=>c&&c.length<=24,mathy=c=>VR.test(c)||/^\(?[-+]?[0-9][0-9.]*%?\)?$/.test(c);
+core.forEach((c,i)=>{if(OPS.has(c)&&!suf[i])[i-1,i+1].forEach(j=>{if(j>=0&&j<n&&term(core[j]))run[j]=true})});
+for(let k=0;k<3;k++)core.forEach((c,i)=>{if(run[i]&&suf[i]==","&&i<n-1&&mathy(core[i+1]))run[i+1]=true});
+for(let k=0;k<3;k++)core.forEach((c,i)=>{if(WK.has(c)&&!suf[i]&&i>0&&i<n-1&&term(core[i-1])&&term(core[i+1])&&(run[i-1]||run[i+1]||mathy(core[i-1])||mathy(core[i+1])))run[i-1]=run[i]=run[i+1]=true});
+let out="",i=0;while(i<n){if(!run[i]){out+=tk[i]+(i<n-1?" ":"");i++;continue}let j=i;while(j<n-1&&run[j+1]&&(!suf[j]||(suf[j]==","&&mathy(core[j+1]))))j++;out+="$"+mj(core.slice(i,j+1).map((c,k)=>k<j-i?c+suf[i+k]:c).join(" "))+"$"+suf[j]+(j<n-1?" ":"");i=j+1}return out}
+const cvt=t=>t.split(/(\$[^$]*\$)/).map((p,i)=>i%2?p:cvp(p)).join("");
+const SKP=/^(SCRIPT|STYLE|PRE|CODE|TEXTAREA|OPTION|SELECT|SVG|MJX-.*)$/i;
+function atx(root){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{for(let e=n.parentElement;e;e=e.parentElement){if(SKP.test(e.nodeName)||(e.classList&&e.classList.contains("tex2jax_ignore")))return NodeFilter.FILTER_REJECT;if(e===root)break}return NodeFilter.FILTER_ACCEPT}}),ns=[];while(w.nextNode())ns.push(w.currentNode);ns.forEach(n=>{const o=cvt(n.nodeValue);if(o!==n.nodeValue)n.nodeValue=o})}
+const rts=new Set();let sched=false;
+new MutationObserver(ms=>{ms.forEach(m=>{if(m.target.closest&&m.target.closest("mjx-container,svg,pre,.tex2jax_ignore"))return;m.addedNodes.forEach(nd=>{if(nd.nodeType==1){if(!/^(MJX-|SVG$)/i.test(nd.nodeName))rts.add(nd)}else if(nd.nodeType==3)rts.add(m.target)})});if(rts.size&&!sched){sched=true;requestAnimationFrame(()=>{sched=false;const rs=[...rts];rts.clear();rs.forEach(r=>{if(r.isConnected){atx(r);tx(r)}})})}}).observe(document.body,{childList:true,subtree:true});
+atx(document.body);
 </script></body></html>
